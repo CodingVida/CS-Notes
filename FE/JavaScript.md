@@ -607,9 +607,125 @@ js引擎执行代码的过程是一个边解析边执行的过程：在执行一
 * 同步异步，关注的是“消息通信机制”，是否要主动询问。比如同步的select、poll、epoll，异步的AIO（Linux下的异步IO，会发出IO完成的通知）。
 * 阻塞非阻塞，关注的是”在等待调用结果”时的状态是否被挂起（还能否做其他事）。epoll操作是在异步操作下的主动询问行为，即异步非阻塞操作。
 
+### 28. 模块化
+
+#### 28.1 理解
+
+​	一个模块是为实现一个特定功能的一组方法。在最开始的时候，js实现的功能比较简单，也就无所谓模块化的概念。但随着应用复杂度的上升，代码量随之增大，为了方便对代码的维护，模块化也就越来越重要。
+
+* 最开始的做法是利用函数具有独立作用域的特点，将函数作为模块。但这种方式很容易造成全局变量的污染，而且模块之间没有联系。
+* 后来提出了对象写法，通过将函数作为对象的方法来实现。但这种做法会暴露所有的模块成员，外部可以直接访问修改内部属性的值。
+* 现在最常见的是立即执行函数的写法，利用闭包实现模块的私有作用域，同时不会对全局变量造成污染。
+
+#### 28.2 模块化规范
+
+​	现在比较成熟的模块化规范有四种：
+
+* CommonJS
+    * `requre` 导入模块，`module.exports` 导出模块。
+    * 由于是同步加载，因此更适用于服务器端。
+* AMD：Asynchromous Module Definition
+    * 异步加载模块，所有依赖这些模块的代码定义在回调函数中。
+    * requirejs实现了这个规范。
+* CMD: Common Module Definition
+    * 也是异步加载模块。
+    * seajs实现了这个规范。
+* ES6 Module
+    * `import` 导入模块
+    * `export` 导出模块
+
+#### 28.3 AMD和CMD的区别
+
+> !!! 二者都是**异步加载**模块！！！
+>
+> 区别是在 定义模块时对依赖的处理 和 依赖模块的执行时机。
+
+* 定义模块时对依赖的处理：
+    * AMD推崇 **依赖前置**，在定义时就要说明依赖的模块。
+    * CMD推崇 **依赖就近**，在用到时才去 require，需要解析成字符串才能知道需要的依赖，但开发便利。
+* 执行时机：
+    * AMD在加载完模块后立即执行
+    * CMD加载完后不执行，遇到require才执行。
+
+代码例子如下：
+
+````javascript
+// AMD
+define(['./a', './b'], function (a, b) {
+    ...
+})
+
+// CMD
+define(function (require, exports, module) {
+    var a = require('./a');
+    ...
+    var b = require('./b');
+    ...
+})
+````
 
 
-### 28. 浏览器的缓存机制
 
-[http cache]: https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Caching_FAQ
+#### 28.4 ES6模块与CommonJS
+
+​	它们有两个重大差异：
+
+* CommonJS输出的是一个值的浅拷贝，ES6模块输出的是指的引用。
+* CommonJS模块在运行时加载，ES6模块在编译时输出接口。
+
+第二个差异产生的原因是，CommonJS加载的是一个对象，即 `module.exports`，这个对象只有在脚本运行的时候会生成；而ES6 模块不是对象，它的对外接口只是一种静态定义（export），在代码解析阶段就会生成。
+
+
+
+#### 28.5 requirejs的核心原理
+
+* 动态加载
+    * 动态创建 `script` 标签异步引入脚本
+    * 监听load事件，如果依赖全部加载完则执行回调。
+* 避免多次加载
+    * 加载时，缓存其标识，状态status设置为loading
+    * 再次导入这个模块时，识别到其已被缓存，但状态不为loaded，则将回调加到 onload 回调队列的尾部。 
+* 缓存
+    * 存储在内部对象 moduleCache 中。
+
+### 29. document.write 和 innerHTML的区别
+
+* document.write 的内容会代替整个文档的内容
+* innerHTML的内容只替换指定元素的内容（document.documentElement 返回根元素的**只读对象**）
+
+
+
+### 30. DOM操作
+
+#### 30.1 创建新节点
+
+* `document.createDocumentFragment`：存在于内存中，在上边添加子节点不会引起页面的回流，能有更好的性能
+* `document.createElement(tagName[, options])`
+* `document.createTextNode(str)`
+
+#### 30.2 添加、移除、替换、插入
+
+* `parentNode.appendChild(aChild)`
+* `parentNode.removeChild(child)`：删除并返回。`node.parentNode && node.parentNode.removeChild(node)`
+* `parentNode.replaceChild(newChild, oldChild)`: return the same node as oldChild
+* `parentNode.insertBefore(newNode, referenceNode)`: reference 为null，则插入到末尾。
+* `element.insertAdjacentElement(position, element)`: position = beforebegin | afterbegin | beforeend | afterend
+
+#### 30.3 查找
+
+* `document.getElementById(id)`: 仅作为 `document` 的方法时有效（id唯一）。
+* `document.getElementsByTagName`
+* `document.getElementsByName`
+* `document.getElementsByClassName`
+* `document.querySelector()`
+* `document.querySelectroAll`
+
+#### 30.4 属性操作
+
+* `getAttribute(key)`
+* `setAttribute(key, value)`
+* `hasAttribute(key)`
+* `removeAttribute(key)`
+
+
 
