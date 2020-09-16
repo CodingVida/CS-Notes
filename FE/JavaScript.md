@@ -880,10 +880,43 @@ function getFileExtension(filename) {
 
 * 防抖
     * 函数在触发后的n毫秒后执行，如果在这段时间内被再次触发，则重新计时
+    
     * 可以用在用户点击发送请求的场景中，避免多次点击而重复发送请求
+    
+        ```javascript
+        function debounce (fn, delay) {
+            let timer = null;
+            return function () {
+                const args = arguments;
+                const ctx = this;
+                clearTimeout(timer);
+                timer = setTimeout(() => {
+                    fn.apply(ctx, args);
+                }, delay);
+            }
+        }
+        ```
+    
+        
 * 节流
     * 在一定时间内多次触发，函数只执行一次。
+    
     * 比如在scroll函数的监听事件中，通过节流降低事件的调用评率。
+    
+        ````javascript
+        function throttle (fn, delay) {
+            let pre = Date.now();
+            return function () {
+                const ctx = this;
+                const args = arguments;
+                let cur = Date.now();
+                if (cur - pre > delay) {
+                    fn.apply(ctx, args);
+                    pre = cur;
+                }
+        	}
+        }
+        ````
 
 ### 42. escape、encodeURI、encodeURIComponent
 
@@ -961,5 +994,105 @@ new Promise(function(resolve,reject){
 
 #### 45.1 浅拷贝
 
+```javascript
+function shallowCopy (obj) {
+    if (!obj || typeof obj !== 'object') {
+        return;
+    }
+    const newObj = Array.isArray(obj) ? [] : {};
+    for (const key in obj) {
+        if (obj.hasOwnProperty(key)) {
+            newObj[key] = obj[key];
+        }
+    }
+    return newObj;
+}
+```
+
+
+
 #### 45.2 深拷贝
 
+```javascript
+function deepCopy (obj) {
+    if (!obj || typeof obj !== 'object') {
+        return;
+    }
+    const newObj = Array.isArray(obj) ? [] : {};
+    for (const key in obj) {
+        if (obj.hasOwnProperty(key)) {
+            newObj[key] = typeof obj[key] === 'object' ? deepCopy(obj[key]) : obj[key];
+        }
+    }
+    return obj;
+}
+```
+
+
+
+### 46. call、apply、bind函数手写
+
+#### 46.1 call
+
+* 实现步骤：
+
+    * 判断调用对象是不是函数，因为call方法定义在函数原型上
+    * 获取参数
+    * 设置上下文context，如果未传入，则将其设置为window
+    * 将调用函数设置为context对象的方法
+    * 传入参数调用
+    * 返回结果
+
+* 实现
+
+    ```javascript
+    Function.prototype.myCall = function (context, ...args) {
+        if (typeof this !== 'function') {
+            return new Error('Type Error');
+        }
+        const ctx = context || window;
+        let result;
+        
+        ctx.fn = this;
+        result =  ctx.fn(...args);
+        
+        delete ctx.fn;
+        return result;
+    }
+    ```
+
+    #### 46.2 apply
+
+    * 实现步骤
+
+    * 代码
+
+        ```JavaScript
+        Function.prototype.myApply = function (context, args) {
+            ...
+            
+            result = ctx.fn(ctx, args);
+            
+            ...
+        }
+        ```
+
+    #### 46.3 bind
+
+    * 实现步骤
+
+        * 类型判断
+
+    * 实现
+
+        ```JavaScript
+        Function.prototype.myBind = function (ctx, args) {
+            if (typeof this !== 'function') {
+                return new Error('Type Error');
+            }
+            
+           return ...
+        }
+        ```
+
+        
