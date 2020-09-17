@@ -116,6 +116,8 @@ Object.prototype.toString.call([1, 2, 3]);
 > * `p.__proto__`
 > * p.constructor.prototype | P.prototype
 > * Object.getPrototypeOf(p)
+>
+> ps：`instanceof`：用于检测构造函数的prototype是否出现在某个实例的原型链中。
 
 ### 9.  继承
 
@@ -897,7 +899,6 @@ function getFileExtension(filename) {
         }
         ```
     
-        
 * 节流
     * 在一定时间内多次触发，函数只执行一次。
     
@@ -1061,38 +1062,57 @@ function deepCopy (obj) {
     }
     ```
 
-    #### 46.2 apply
+#### 46.2 apply
 
-    * 实现步骤
+* 实现步骤
 
-    * 代码
+* 代码
 
-        ```JavaScript
-        Function.prototype.myApply = function (context, args) {
-            ...
-            
-            result = ctx.fn(ctx, args);
-            
-            ...
-        }
-        ```
+```JavaScript
+Function.prototype.myApply = function (context, args) {
+	...
 
-    #### 46.3 bind
+	result = ctx.fn(ctx, args);
 
-    * 实现步骤
+	...
+}	
+```
 
-        * 类型判断
+#### 46.3 bind
 
-    * 实现
+* `bind()` 函数创建一个新的函数，当这个函数被调用时，bind的第一个参数作为运行时this，其余的参数将会在传递的实参前传入作为新函数的参数。
 
-        ```JavaScript
-        Function.prototype.myBind = function (ctx, args) {
-            if (typeof this !== 'function') {
-                return new Error('Type Error');
-            }
-            
-           return ...
-        }
-        ```
+* 实现步骤
 
-        
+    * 类型判断
+
+* 实现
+
+```JavaScript
+Function.prototype.myBind = function (context) {
+    if (typeof this !== 'function') {
+    	throw new Error('Type Error');
+    }
+    const fn = this;
+    const args = [].slice.call(arguments, 1);
+    
+    function fNOP () {}
+    function fBound () {
+        const bindArgs = [].slice.call(arguments);
+        return fn.apply(
+        	this instanceof fNOP ? this : context,
+            args.concat(bindArgs)
+        );
+    }
+    
+    fNOP.prototype = fn.prototype;
+    fBound.prototype = new fNOP();
+    return fBound;
+}
+```
+
+​        
+
+
+### 47.  函数柯里化
+
