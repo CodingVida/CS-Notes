@@ -185,13 +185,48 @@ module.exports = {
 
 #### 9.3 解析css
 
+* `style-loader`
+* `css-loader`
+* `scss-loader`
+
 #### 9.4 解析图片和字体
+
+`file-loader`
 
 
 
 ### 10. 文件监听
 
+> 文件监听是在发现源码发生变化时，自动构建出新的输出文件。
 
+* webpack开启监听模式，有两种方式：
+    * 启动webpack命令时，带上 `--watch` 参数
+    * 配置文件 `webpack.config.js` 中设置参数 `watch: true`
+
+* 缺陷：需要手动刷新浏览器。
+
+* 文件监听的原理：
+
+    * **轮询** 判断文件的最后编辑时间是否发生变化
+    * 某个文件发生变化时，不会立即告诉监听者，而是先缓存起来，等 `aggregateTimeout`
+
+    ```JavaScript
+    module.exports = {
+        // 默认不开启，即为 false
+        wathch: true,
+        // watch 为true，watchOptions 才有意义
+        watchOptions: {
+            // 不监听的文件或者文件夹，支持正则，默认为空
+            ignored: /node_moduel/,
+            // 实施延迟，默认300ms
+            aggregateTimeout: 300ms,
+            // 判断文件变化时通过不停访问系统文件是否有变化，默认每秒 1000 次
+            poll: 1000
+        }
+    }
+    ```
+
+    
 
 
 

@@ -1116,3 +1116,100 @@ Function.prototype.myBind = function (context) {
 
 ### 47.  函数柯里化
 
+柯里化是一种将 使用**多个参数的一个**函数 转换成 **一系列使用一个参数**的函数 的技术。
+
+```javascript
+function curry (fn, args) {
+    const len = fn.length;
+    args = args || [];
+    
+    return function () {
+        const subArgs = args.slice(0);
+    	for (let i = 0; i < arguments.length; i++) {
+            subArgs.push(arguments[i]);
+        }
+        if (subArgs.length >= len) {
+            return fn.apply(this, subArgs);
+        } else {
+            return curry.call(this, fn, subArgs);
+        }
+    }
+}
+
+// es6
+function curry (fn, ...args) {
+    return fn.length <= args.length ? fn.apply(this, args) : curry.bind(this, fn, ...args);
+}
+```
+
+
+
+### 48. 原码、反码、补码
+
+* 原码
+    * 计算机中对数字二进制的定点表示法，最高位表示 **符号**，其余为表示 **数值位**。
+    * 优点是易于分辨，缺点是不能直接参与运算。
+* 反码：
+    * 正数的反码等于原码，负数的反码符号位为2，数值位按位取反。
+    * `[+7] 原 = 0000 0111`，`[+7] 反 = 0000 0111`
+    * `[-7] 原 = 1000 0111`，`[-7] 反 = 1111 1000`
+* 补码：
+    * 正数的补码等于原码，负数的补码为其反码 + 1
+    * `[+7] 原 = 0000 0111`，`[+7] 反 = 0000 0111`，`[+7] 补 = 0000 0111`
+    * `[-7] 原 = 1000 0111`，`[-7] 反 = 1111 1000`，`[-7] 补 = 1111 1001`
+
+> 计算机使用补码表示负数的原因在于，可以将**加法运算拓展**到所有的数值上，数字电路中只需要设计**加法器**就可以了。
+
+[关于2的补码]:http://www.ruanyifeng.com/blog/2009/08/twos_complement.html
+
+
+
+### 49. Object.defineProperty
+
+三个参数：
+
+* 要定义的对象obj
+* 要定义的属性prop
+* 属性描述符
+    * value：值
+    * enumerable：枚举
+    * writable：可否**赋值修改**
+    * configurable：是否可以从对象上**删除**这个属性，以及是否可以修改除value、writable之外的其他特性。
+* set、get
+
+### 50. 函数式编程
+
+
+
+### 51. 异步编程的实现方式
+
+
+
+### 52. js动画与css动画
+
+
+
+### 53. 图片的懒加载和预加载
+
+
+
+### 54. mouseover 和 mouseenter
+
+当鼠标移动至元素上时就会触发 `mouseenter`时间，与 `mouseover` 类似，不同之处在于 `mouseenter` 不会冒泡。
+
+
+
+### 55. jsonp实现
+
+
+
+### 56. 类型判断
+
+
+
+### 57. performance API
+
+> 如何确定页面的可用性时间？
+
+
+
