@@ -1179,19 +1179,71 @@ function curry (fn, ...args) {
 
 ### 50. 函数式编程
 
+​	函数式编程是一种“编程范式”，也就是如何编程的方法论。它有五个鲜明的特点：
 
+* 函数是”第一等公民“。第一等公民指的是，函数跟其他数据类型一样处于平等的地位，可以赋值给其他变量，可以作为参数，也能作为返回值。
+* 只用“表达式”，不用“语句”。表达式是一个单纯的运算过程，总有返回值；语句是一个操作过程，没有返回值。
+* 没有副作用（side effect）。函数保持独立，所有功能仅返回值，而没有其他行为，尤其是改变外部变量的值。
+* 不修改状态
+* 引用透明：不依赖外部变量或“状态”，只要参数相同，函数的返回值相同。
+
+​	
 
 ### 51. 异步编程的实现方式
 
+* 回调函数
 
+    上下层函数的代码耦合度高，不利于维护。
+
+* 事件
+
+    流程不够清晰
+
+* promise
+
+    可以将嵌套的回调函数换位链式调用。但多个 then 的链式调用可能会造成语义的不清晰。
+
+* generator
+
+    * generator 可以在函数执行的过程中，将函数的执行权转移出去（yield），在函数外部我们可以将执行权转移回来（next）。
+    * 那么，当遇到异步函数的时候，将执行权转移出去，在异步函数执行完毕的时候将执行权转移回来。如此，在generator函数内部可以用同步的顺序书写异步逻辑。
+    * 要考虑的问题是，何时将函数的执行权转移回来。因此就需要有一个自动执行generator的机制，比如 TJ 的co模块。
+
+* async/await
+
+    * async函数时 generator 和 promise 实现的一个自动执行的语法糖，它内部自带执行器。
+    * 函数在执行到 await 语句的时候，如果语句返回的是一个promise对象，那么函数将等待至promise对象的状态变为 resolve后再继续向下执行。因此可以用同步的顺序书写异步逻辑，并且这个函数会自动执行。
+    * try...catch.. 的错误捕获可能不太讨喜。
 
 ### 52. js动画与css动画
 
+css3 动画由于浏览器的优化在性能上要好一些，代码相对也要简单一些。但在动画控制上不够灵活，而且也存在兼容性问题。
 
+js动画则弥补了这两个缺点。
 
 ### 53. 图片的懒加载和预加载
 
+* 懒加载
 
+    * 也叫延迟加载，指的是在长网页中延迟加载图片的时机，等到用户需要访问时再加载，这样可以提高首屏的加载速度，提高用户体验，并且可以降低服务器的压力。
+
+    * 适用网页较长，图片较多的场景。
+
+    * 原理一般为：开始时img的src设置为空字符串，同时将其真实路径保存在一个自定义属性中。当页面滚动的时候，判断其是否在可视区域内，如果在则替换src属性加载。
+
+        ```JavaScript
+        const { top, bottom } = imgItem.getBoundingClientRect();
+        const viewHeight = document.documentElement.clientHeight || window.innerHeight;
+        if (top < viewHeight && bottom > 0) {
+            imgItem.setAttribute('src',  imgItem.dataset.original);
+        }
+        ```
+
+* 预加载
+
+    * 将所需的资源预先请求加载到本地，在需要的时候从缓存中获取。预加载可以减少用户的等待时间，提高用户体验
+    * 图片预加载可以使用 `new Image()`设置src属性来预加载
+    * 会加载服务器的压力。
 
 ### 54. mouseover 和 mouseenter
 
@@ -1201,9 +1253,52 @@ function curry (fn, ...args) {
 
 ### 55. jsonp实现
 
+```JavaScript
+function myJsonp (url, params, callback) {
+    let queryString = url.indexOf('?') === -1 ? '?' : '&';
+    for (const key in params) {
+		if (params.hasOwnProperty(key)) {
+            queryString += `${key}=${params[key]}&`;
+        }
+    }
+    const callbackName = 'myJsonp' + Math.random().toString().replace('.', '');
+    url += queryString + 'callback=' + callbackName
+    
+    const scriptEle = document.createElement('script');
+    scriptEle.src = url;
+    window[callbackName] = function() {
+		callback(...arguments);
+        delete window[callbackName];
+        document.getElementsByTagName('head')[0].removeChild(scriptEle);
+    }
+    document.getElementsByTagName('head')[0].appendChild(scriptEle); // 跟图片不同，需要插入到文档中才会下载
+}
+```
+
 
 
 ### 56. 类型判断
+
+```javascript
+function getType (value) {
+    // null
+    if (value === null) {
+        return value + '';
+    }
+
+    // 引用类型
+    if (typeof value === 'object') {
+        return 
+        Object.prototype.toString
+            .call(value).split(' ')[1]
+            .slice(0, -1)
+            .toLowerCase();
+    } else {
+    // 函数 和 基本类型
+        return typeof value;    
+    }
+}
+```
 
 
 
@@ -1211,5 +1306,48 @@ function curry (fn, ...args) {
 
 > 如何确定页面的可用性时间？
 
+此前为了得到脚本的运行耗时，一般使用Date对象的 `getTime` 方法。但存在两个局限性：
 
+1. 精度不够：毫秒级
+2. 无法获悉后台事件的运行进度，比如浏览器用了多少时间从服务器加载网页。
+
+为了解决这个两个问题，ES5 引入了"高精度时间戳"的 API，部署在 `performance` 对象上。
+
+* `performance.timing`：包含了各种与浏览器性能相关的时间数据，提供浏览器处理网页时各个阶段的耗时，比如 `performance.timing.navigationStart` 就是浏览器处理当前网页的启动时间。
+    * TCP连接耗时：`tcp = t.connectEnd - t.connectStart`
+    * 域名解析：`dns = t.domainLookupEnd - t.domainLookupStart`
+    * 读取页面第一个字节前的耗时：`ttfb = t.responseStart - t.navigationStart`
+    * 页面加载耗时：`pageLoadTime = t.loadEventStart - t.navigationStart`
+* `performance.now()`：返回 `navigationStart` 到当前时间的毫秒数，有小数，精度更高。
+* `performance.navigation`：用户行为信息
+    * type: 网页加载来源 0、 1、 2、 255
+    * redirectCount：当前网页时经过了几次重定向到来的。
+* `performance.getEntries()`: 获取各个请求对象的时间统计信息。
+* ...
+
+
+
+### 58. 为什么要使用 setTimeout 模拟 setInterval
+
+`setInterval`的作用是每隔一段时间执行一次函数，但其真正的作用是每隔一段时间往事件队列中放入一个回调函数，但只有当前执行栈空了之后，才会从事件队列中取出一个回调执行。导致的结果就是，如果有一段逻辑执行时间太长（比如多个时间间隔长度），那么事件队列中就可能积累了多个相同回调，当执行栈空的时候，多个回调被依次取出执行了。
+
+针对这个缺点，可以使用 `setTimeout` 模拟其作用，在确保一个函数执行完毕后再触发下一个定时器。
+
+```JavaScript
+function myInterval (fn, timeout) {
+    const timer = {
+        flag: true
+    };
+    
+    function interval () {
+        if (timer.flag) {
+            fn();
+            setTimeout(interval, timeout);
+        }
+    }
+    setTimeout(interval, timeout);
+    
+    return timer;
+} 
+```
 
