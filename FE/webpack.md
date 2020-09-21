@@ -228,5 +228,249 @@ module.exports = {
 
     
 
+ 
+
+### 11. 热更新
+
+#### 11.1 热更新方式
+
+* `webpack-dev-server`
+
+    * `--open` 自动打开参数
+    * wds不刷新浏览器
+    * 不输出文件，而是放在内存中，无IO，构建速度更快。
+    * 使用 `HotModuleReplacementPlugin` 插件
+
+* `webpack-dev-middleware`
+
+    * 配合 `express` 或者 `koa`
+
+        ```JavaScript
+        const express = require('express');
+        const webpakc = require('webpack');
+        const webpackDevMiddleware = require('webpack-dev-middleware');
+        
+        const app = express();
+        const config = require('./webpack.config.js');
+        const compiler = webpack(config);
+        
+        app.use(webpackDevMiddleware(compiler, {
+            publickPath: config.output.publickPath
+        }));
+        
+        app.listen(3000, () => {
+            ...
+        });
+        ```
+
+    * wdm 将webpack的输出文件传输给服务器，使用与灵活的定制场景
+
+    
+
+#### 11.2 原理分析
+
+    ![](../images//image-20200920235002543.png)
 
 
+​    
+
+热更新分为两个阶段：启动阶段 和 开发阶段
+
+* 启动阶段：初始代码通过webpack compiler进行打包，推送到同在服务端的 Bundle Server，，让浏览器可以访问得到。
+* 开发阶段：文件发生改变时，代码仍会经过 webpack compiler进行编译打包，但此时是推送到同在服务端的HMR Server，让其知晓哪些内容发生变化，HMR Server再通知被注入到浏览器中的HMR Runtime（通常是通过 websocket通信），使用 json格式传输数据，最后是由HMR Runtime 更新浏览器端数据。
+
+
+
+### 12. 文件指纹
+
+* 种类
+    * Hash
+        * 和整个项目有关，只要项目文件有修改，**整个项目**构建的hash都会改变。
+    * ChunkHash
+        * 和 webpack 打包的 chunk（打包好的模块） 有关，不同的 entry 会生成不同的chunkhash。
+    * ContentHash
+        * 根据文件内容来定义hash，文件内容不变，则contentHash不变。
+
+
+
+### 13. html/css/js压缩
+
+* js 压缩
+
+    * 内置了 uglifyjs-webpack-plugin
+
+* css 压缩
+
+    * `optimize-css-asset-webpack-plugin`
+
+    * 同时使用css处理器 `cssnano`
+
+        ```js
+        ...
+        plugins: [
+            new OptimizeCssAssetsPlugin({
+                assetNameRegExp: /\.css$/g,
+                cssProcessor: require('cssnano')
+            })
+        ]
+        ...
+        
+        ```
+
+* html 压缩
+
+    * 修改 `html-webpack-plugin` 参数，设置压缩参数 `minify` 。一个页面一次 `new HtmlWebpackPlugin()`
+
+        ```JavaScript
+        ...
+        plugins: [
+            new HtmlWebpackPlugin({
+                template: path.join(__dirname, 'src/index.html'),
+                filename: 'index.html',
+                chunks: ['index', ]
+                inject: true,
+                minify: {
+                	html5: true,
+                	collapseWhitespace: true,
+                	preserveLineBreaks: false,
+                	minifyCSS: true,
+                	minifyJS: true,
+                	removeComments: false
+            	}
+            })
+        ]
+        ```
+
+        
+
+### 14. 自动清理构建目录
+
+* 避免每次构建前手动清理dist 
+    * `clean-webpack-plugin`
+    * 默认会删除output指定的输出目录
+
+
+
+### 15. 增强css
+
+#### 15.1 PostCss loader插件 autoprefixer 自动补全 css3前缀
+
+* 使用 autoprefixer 插件
+
+    * 根据 Can I Use 规则
+
+    * ```JavaScript
+        // webpack.config.js
+        ....
+        module: {
+            rules: [
+                {
+                    test: /\.scss$/,
+                    use: [
+                        'style-loader',
+                        'css-loader',
+                        'scss-loader',
+                        'postcsss-loader'
+                    ]
+                }
+            ]
+        }
+        
+        // postcss.config.js
+        module.exports = {
+            plugins: [
+                require('autoprefixer')
+            ]
+        }
+        
+        // package.json
+        ...
+        "browserslist": ["last 2 version", ">1%", "ios 7"],
+        ...
+        ```
+
+#### 15.2.  移动端css 转换 px 为 rem
+
+* 此前：
+    * `@media screen and (max-width: 980) { ... }`
+    * 需要写多套适配样式代码
+    
+* `px2rem-loader` + `lib-flexible`
+
+    ```javascript
+    ...
+    rules: [
+        ...,
+        {
+        	loader: 'px2rem-loader',
+        	options: {
+        		remUnit: 75,
+        		remPrecision: 8
+        	}
+        }
+    ]
+    ```
+
+
+
+### 16. 资源内联
+
+#### 16.1 资源内联的意义
+
+* 代码层面：
+    * 代码框架的初始化脚本
+    * 上报相关的埋点
+    * css  内联避免页面闪动
+* 请求层面：减少http请求
+    * 小图片 或者 字体内联 => `url-loader` 设置 limit
+
+#### 16.2 css 内联
+
+* `style-loader`
+
+    ```javascript
+    ...
+    {
+        test: /\.css$/,
+    	use: [
+            {
+                loader: 'style-loader',
+                options: {
+                    insertAt: 'top',
+                    singleton: true // 将所有的style标签合并成一个
+                }
+            },
+            'css-loader'
+        ]
+    }
+    ```
+
+    
+
+* `html-inline-css-webpack-plugin`
+
+* 
+
+#### 16.3 html/js
+
+`raw-laoder`
+
+
+
+### 17. 多页面
+
+> 每一次页面跳转的时候，后台服务器都返回一个新的html文档，这种类型的网站就是多页面网站，也叫多页面应用。多SEO更友好。
+
+* **多页面打包的基本思路：**每个页面对应一个 `entry` 和 一个 `html-webpack-plugin`。缺点是每次新增后者删除页面都需要修改 webpack 配置。
+
+* **多页面打包通用方案**：动态获取 entry 和设置 html-webpack-plugin 
+
+    * 利用 `glob.sync`
+
+        ```javascript
+        glob.sync(path.join(__dirname, './src/*/index.js'))
+        ```
+
+        
+
+    
