@@ -471,6 +471,143 @@ module.exports = {
         glob.sync(path.join(__dirname, './src/*/index.js'))
         ```
 
-        
 
-    
+
+
+### 18. 使用 source-map
+
+* souce-map 是一个信息文件，里边存储着代码转换前后的对应位置信息。整个 map 文件就是一个JavaScript对象：version、files、sources、names、mappings。
+
+* 作用：通过 `source-map` 定位到源码中位置。
+* 开发环境开启，线上环境会关闭（避免暴露逻辑）。
+    * 线上可以传输到监控系统做问题排查。
+* webpack 中使用 `devtool` 控制是否生成 以及 如何生成 source-map：
+
+各种环境下的选项：
+
+* 对于开发环境：
+    * `eval`：每个模块都用 `eval` 执行，并且都有 `//@ sourceURL` 。
+        * 构建速度 快
+        * 主要缺点是 由于映射到转换后的代码，而不是映射到原始代码（没有从loader中获取sourcemap），因此不能正确显示行数。
+    * `eval-source-map`：每个模块都用 `eval`执行，并且 source-map 转换为 DataUrl 后添加到 `eval()` 中。
+        * 初始化会比较慢，但在重新构建时会比较快。并且行数能够正确映射。
+        * 最适合开发环境的模式。
+    * `cheap-eval-source-map`：类似 `eval-source-map`
+        * 但它是 `cheap低开销` 的source-map，没有列映射，只映射行。会忽略源自 loader 的source-map
+    * `cheap-module-eval-source-map`：类似 `cheap-eval-source-map`， loader source map 会被简化为每行一个映射。 
+* 对于生产环境：
+    * `none`：不开启生成 source map
+    * `source-map`：source map 作为单独文件生成，并且在 bundle中添加引用注释：`//# sourceMappingURL=index-71cf28eb.js.map`
+    * `nosources-source-map`：同 `source-map`相比，其**不包含源代码内容**，用来映射堆栈跟踪（源文件行数位置），仍会暴露源文件名字和结构，但没有源代码。
+    * `hidden-source-map`：同 `source-map`相比，不会在bundle中添加引用注释，用来映射堆栈跟踪（打包后的文件行数位置）。
+
+
+
+### 19. 提取公共页面资源
+
+#### 19.1 基础库分离
+
+ 将比如 react 等基础包通过 cdn 引入，不打入 bundle
+
+* 配置项：`externals` 配合 html中脚本引入
+
+* 使用 `html-webpack-externals-plugin`
+
+* `SplitChunksPlugin`：webpack4 内置的，替代 `CommonsChunkPlugin` 插件
+
+    ```javascript
+    module.exports = {
+    	optimization: {
+    		splitChunks: {
+                cacheGroups: {
+                    test: /(react|react-dom)/,
+                    name: 'vendor',
+                    chunks: 'all'
+                }
+            }
+    	}
+    }
+    ```
+
+
+
+#### 19.2 公共脚本分离
+
+`SplitChunksPlugin`
+
+````JavaScript
+module.exports = {
+    optimization: {
+        splitChunks: {
+            chunks: 'all',
+            cacheGroups: {
+                libs: {
+                    name: 'chunk-libs',
+                    test: /[\\/]node_modules[\\/]/,
+                    priority: 10
+                },
+                commons: {
+                    name: 'chunk-libs',
+                    test: path.join(__dirname, 'src/commons'),
+                    chunks: 'all', // 同步 initial、异步 async，同步异步 all（推荐）,
+                    miniChunks: 2, // 最小引用次数
+                    miniSize: 0,   // bytes
+                    priority: 20,
+                    
+                }
+            }
+        }
+    }
+}
+````
+
+
+
+### 20. Tree Shaking（摇树优化）
+
+* 用于移除 JavaScript 上下文中的 未引用代码（dead code）：
+    * 代码不会被执行、不可达
+    * 代码的结果不会被用到
+    * 代码只影响死变量（只写不读）
+* 依赖于 ES6 模块语法 的静态特性：`export` 和 `import`，本质上是利用了 `静态分析`
+* mode 为 “production” 时开启。
+
+
+
+### 21. ScopeHoisting（作用域提升）
+
+**模块转换分析**：被转换后的代码会带上一层包裹，`import` 会被 转为 `__webpack_require`。
+
+**现象**：构建后的代码存在大量闭包，包裹着每个模块。
+
+**问题**：大量函数闭包包裹代码，体积增大；运行代码时创建的函数作用域变多，内存开销大。
+
+ScopeHoisting 可以**减少**函数声明代码和内存开销：
+
+**原理**：将引用的所有模块的代码按照 **引用顺序** 放在同一个函数作用域中，然后适当重命名一些变量以防止变量名冲突。
+
+**开启**：`mode` 为 `production` 默认开启（ModuleConcatenationPlugin）；必须为 ES6 语法（CJS 很难确定引用顺序。
+
+
+
+### 22. 代码分割和动态import
+
+> es6 的动态import ： `@babel/plugin-syntax-dynamic-import`
+
+适用：1、抽离相同代码到一个共享块；2、脚本懒加载，使得初始下载的代码更小。
+
+
+
+### 23. 结合EsLint
+
+* 行业优秀规范，比如 Airbnb `eslint-config-airbnb`、alloyTeam`eslint-config-alloy`
+
+* 制定团队的ESLint规范：
+    * 不要重复造轮子，基于 `eslint:recommend` 配置并改进
+    * 能够帮助发现代码错误的规则，全部开启
+    * 使团队代码风格统一，而不是限制开发体验
+* 如何落地？
+    * 和 `CI/CD`系统集成：
+        * `precommit`
+        * 在 CI Pipeline 中 增加 lint pipeline。
+    * 和 `webpack` 集成：使用 `elint-loader`，构建时检查js规范
