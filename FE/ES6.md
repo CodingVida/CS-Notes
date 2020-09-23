@@ -75,6 +75,23 @@ res参数，`(...rest)`，用于获取函数的多余参数
 
 
 
+### 9. Promise 和 Promise/A+规范
+
+​	Promise 对象是异步编程的一种解决方案，最早由社区提出。Promise/A+规范 是 JavaScript Promise的标准，规定了Promise的特性：
+
+* Promise 是一个 构造函数，接受一个函数作为参数，返回promise实例；
+* 一个promise实例有三种状态：pending、resolved 和 rejected，分别表示进行中、已成功 和 已失败。resolved 和 rejected 状态只能从 pending中转变而来，且一经改变就凝固了，无法再改变。
+* 这两种转变通过调用方法 `resolve()` 和 `reject()`，可以在 **异步** 操作结束后调用这两个方法改变promise实例的状态。
+* Promise的原型上还定义了 then 方法，可以使用它为两个状态定义回调函数（属于微任务）。
+
+Promise的代码实现：
+
+````JavaScript
+function MyPromise (fn) {
+    
+}
+````
+
 
 
 
