@@ -488,13 +488,13 @@ module.exports = {
 * 对于开发环境：
     * `eval`：每个模块都用 `eval` 执行，并且都有 `//@ sourceURL` 。
         * 构建速度 快
-        * 主要缺点是 由于映射到转换后的代码，而不是映射到原始代码（没有从loader中获取sourcemap），因此不能正确显示行数。
+        * 主要缺点是 由于映射到转换后的代码，而不是映射到原始代码（没有从loader中获取sourcemap）。
     * `eval-source-map`：每个模块都用 `eval`执行，并且 source-map 转换为 DataUrl 后添加到 `eval()` 中。
-        * 初始化会比较慢，但在重新构建时会比较快。并且行数能够正确映射。
+        * 初始化会比较慢，在重新构建时会比较快，并且行数能够正确映射（映射到源代码）。
         * 最适合开发环境的模式。
     * `cheap-eval-source-map`：类似 `eval-source-map`
-        * 但它是 `cheap低开销` 的source-map，没有列映射，只映射行。会忽略源自 loader 的source-map
-    * `cheap-module-eval-source-map`：类似 `cheap-eval-source-map`， loader source map 会被简化为每行一个映射。 
+        * 但它是 `cheap低开销` 的 source-map，会忽略源自 loader 的source-map
+    * `cheap-module-eval-source-map`：类似 `cheap-eval-source-map`， loader 的 source map 会被简化为每行一个映射。 
 * 对于生产环境：
     * `none`：不开启生成 source map
     * `source-map`：source map 作为单独文件生成，并且在 bundle中添加引用注释：`//# sourceMappingURL=index-71cf28eb.js.map`
@@ -586,7 +586,7 @@ ScopeHoisting 可以**减少**函数声明代码和内存开销：
 
 **原理**：将引用的所有模块的代码按照 **引用顺序** 放在同一个函数作用域中，然后适当重命名一些变量以防止变量名冲突。
 
-**开启**：`mode` 为 `production` 默认开启（ModuleConcatenationPlugin）；必须为 ES6 语法（CJS 很难确定引用顺序。
+**开启**：`mode` 为 `production` 默认开启（ModuleConcatenationPlugin）；必须为 ES6 语法（CJS 很难确定引用顺序）。 
 
 
 
@@ -608,6 +608,60 @@ ScopeHoisting 可以**减少**函数声明代码和内存开销：
     * 使团队代码风格统一，而不是限制开发体验
 * 如何落地？
     * 和 `CI/CD`系统集成：
-        * `precommit`
+        * `precommit` 钩子
         * 在 CI Pipeline 中 增加 lint pipeline。
     * 和 `webpack` 集成：使用 `elint-loader`，构建时检查js规范
+
+
+
+### 24. 打包基础库
+
+实现一个大正整数加法库的包，要求：
+
+1. 需要打包压缩版本和非压缩版本
+    * `large-number.js`
+    * `large-number.min.js`
+2. 支持 `AMD`/`CJS`/`ESM` 模块引入（`UMD`）
+
+如何将库暴露出去？
+
+> `output.libraryTarget` 配置如何暴露 library（可以理解为库的引入方法），需要与 `output.library` 配合使用。
+>
+> 导出对象：`output.libraryExport`
+
+
+
+### 25.服务端渲染
+
+什么 服务端渲染（SSR）？
+
+> 渲染：html + css + js + data => 渲染后的html文档
+>
+> 传统的客户端渲染就是 模板和数据的结合过程 在客户端完成。这个结合过程移交给服务器来完成时就可以称为服务端渲染。
+>
+> 服务端渲染的本质是减少请求数量。
+
+优势：所有模板等资源都存储在服务端，内网机器拉取数据更快。有效减少白屏时间，同时也对seo更为友好。
+
+
+
+* 如何解决样式不显示的问题？
+    1. 使用打包出来的浏览器端html文件为模板
+    2. 设置占位符比如 `<!--HTML_PLACEHOLDER-->`，动态替换 `template.replace('<!--HTML_PLACEHOLDER-->', renderContent)`。
+* 首屏数据如何处理？
+    1. 服务端获取数据
+    2. 替换占位符，放入js对象
+
+
+
+### 26. 构建时日志显示优化
+
+* 统计信息字段 `stats`
+    * `errors-only`
+    * `minimal`
+    * `none`
+    * `normal`
+    * `verbose`
+    ![image-20200924210722933](../images/image-20200924210722933.png)
+* 插件：`friendly-errors-webpack-plugin`
+
