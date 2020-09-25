@@ -665,3 +665,124 @@ ScopeHoisting 可以**减少**函数声明代码和内存开销：
     ![image-20200924210722933](../images/image-20200924210722933.png)
 * 插件：`friendly-errors-webpack-plugin`
 
+
+
+### 27. 构建异常和中断处理
+
+> 如何捕获异常？比如在 CI/CD的pipeline 或 发布系统 中需要知道当前的构建状态。
+
+* webpack4 开始，会主动抛出错误码，在构建完成后输入 `echo $?` 获取。
+* 使用 Nodejs的 `process.exit()` 规范：
+    * 0 表示成功
+    * 非0表示失败
+
+> 如何主动捕获并处理构建错误？
+
+* `compiler` 在每次构建结束后会触发 `done` 这个hook
+
+* `process.exit()` 主动处理构建报错
+
+    ```JavaScript
+    plugins: [
+        function () {
+            this.hooks.done.tap('done', (stats) => {
+                if (stats.compilation.errors && process.argv.indexOf('--watch') === -1) {
+                    console.log('build error');
+                    process.exit(1);
+                }
+            })
+        }
+    ]
+    ```
+
+     
+
+### 28. 构建配置包设计
+
+#### 28.1 管理构建配置的可选方案
+
+* 多个配置文件管理不同的环境，`webpack --config` 参数进行控制
+    * `webpack.base.js` ，可通过 `webpack-merge` 被其他环境配置复用。
+        * 资源解析：es6、scss、图片、字体
+        * 样式增强：`postcss-loader`
+        * 目录清理：`clean-webpack-plugin`
+        * 多页面打包：
+        * 命令行显示优化：`stats` + `friendly-errors-webpack-plugin`
+        * 错误捕获
+        * css提取为单独文件：`mini-css-extract-plugin`
+    * `webpack.dev.js`
+        * source-`map：devtool`
+        * devServer：代码热更新（`hot` + `webpack.HotModuleReplacementPlugin`），watch，open
+    * `webpack.pro.js`
+        * 代码压缩：`mode：production` 默认开启
+            * css：`optimize-css-assets-webpack-plugin`
+        * 文件指纹
+        * `Tree Shaking` + `ScopeHoisting`：`mode：production` 默认开启
+        * 速度优化：基础包CDN
+        * 体积优化：代码分割
+    * `webpack.ssr.js`
+        * `outputTarget: umd`
+        * css解析 ignore
+* 将配置设计成一个库
+* 抽成一个 CLI工具：create-react-app、vue-cli
+
+#### 28.2 构建配置抽离成npm包的意义
+
+* 通用性
+    * 统一团队构建脚本
+    * 业务开发者可以无需关注配置
+* 可维护性
+    * 补齐文档说明：README、ChangeLog等
+    * 合理拆分构建配置
+
+#### 28.3 对库进行冒烟测试
+
+> 冒烟测试：软件进行详细的测试前的**预测试**，主要目的是确保**基本功能**有效。
+
+* 改变当前目录：`process.chdir()`。（获取当前目录：`process.cwd()`）
+* 删除文件夹：`rimraf()`
+* 测试工具：`mocha`
+* 查看文件是否存在库：`glob-all`
+
+#### 28.4 编写单元测试
+
+* 技术选型：`mocha`  +  `chai`（断言库，或 `assert`） + `istanbul`(测试覆盖率)
+* 测试代码：describe + `it` + `expect`
+
+#### 28.5 持续集成
+
+* 作用
+
+    * 快速发现错误
+    * 防止分支大幅偏离主干
+
+* 核心措施：代码集成到主干前，必须通过自动化测试。
+
+* 选型：`Travis CI`
+
+    ````yaml
+    language: node_js
+    
+    cache:
+    	apt: true
+    	directories: node_modules
+    	
+    install:
+    	
+    ````
+
+    
+
+#### 28.6 发布到npm
+
+* 添加用户：`npm adduser`
+* 升级版本：
+    * 升级 补丁版本号：`npm version patch`
+    * 升级 小版本号   ：`npm version minor`
+    * 升级 大版本号   ：`npm version major`
+* 发布到 npm：`npm publish`
+
+
+
+### 29. Git规范和ChangeLog生成
+
