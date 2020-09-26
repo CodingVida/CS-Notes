@@ -784,5 +784,116 @@ ScopeHoisting 可以**减少**函数声明代码和内存开销：
 
 
 
-### 29. Git规范和ChangeLog生成
+#### 28.7. Git规范和ChangeLog生成
+
+良好的git commit 规范优势：
+
+* 加快 code review 的过程
+* 可以根据 git commit 生成 ChangeLog
+* 后续维护者可以知道 Feature 被修改的原因
+
+比如：
+
+* 提交格式统一：
+
+    ```pseudocode
+    <type>(<scope>):<subject>
+    <BLANK_LINE>
+    <body>  
+    <BLANK_LINE>
+    <footer>
+    ```
+
+    ![image-20200926205837039](../images/image-20200926205837039.png)
+
+* 本地开发阶段增加 `precommit` 钩子：
+
+    * 安装 `husky`：`npm install husky -D`
+    * 通过 `commitmsg` 钩子校验信息：`validate-commit-msg`
+
+* change log 生成：`conventional-change-cli`
+
+#### 28.8. 语义化版本Semantic Versioning
+
+**规范**：X.Y.Z
+
+* 主版本号X：不兼容的API修改
+* 次版本号Y：向下兼容的功能性新增
+* 修订版本号 X：向下兼容的问题修正
+
+**先行版本号**：可以作为正式发布前的版本，格式是版本号后加上一个连接号 `-`，再加上以 点号`.`分割的标识符组成
+
+* `alpha`：内部测试版，会有很多bug。
+* `beta`：测试版，这个阶段的版本会一直加入新的功能。
+* `rc`（Release Candidate）：发行候选版本。不会再加入新功能，着重除错。
+
+
+
+### 29. 能力分析
+
+#### 29.1 初级分析：stats
+
+`build:stats: webpack --config webpack.prod.js --json > stats.json`
+
+缺陷是**颗粒度比较粗**。
+
+> friendly-errors-webpack-plugin
+
+
+
+#### 29.2 速度分析
+
+`speed-measure-webpack-plugin`
+
+```javascript
+const SpeedMeasurePlugin = require('speed-measure-webpack-plugin');
+const smp = new SpeedMeasurePlugin();
+
+module.exports = smp({
+    entry: {},
+    
+    module: {
+        rules: [
+            
+        ]
+    }
+    
+    plugins: [
+        
+    ]
+}) 
+```
+
+
+
+优势：
+
+* 分析整个打包的耗时
+* 每个插件和loader的执行耗时。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
