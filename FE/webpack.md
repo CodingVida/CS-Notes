@@ -864,8 +864,6 @@ module.exports = smp({
 }) 
 ```
 
-
-
 优势：
 
 * 分析整个打包的耗时
@@ -873,11 +871,81 @@ module.exports = smp({
 
 
 
+#### 29.3 体积分析
+
+`webpack-bundle-analyzer`
+
+```JavaScript
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundelAnalyzerPlugin;
+
+module.exports = {
+    plugins: [
+        new BundleAnalyzerPlugin()
+    ]
+}
+```
 
 
 
+可以分析哪些问题：
+
+* 依赖的第三方模块文件的大小
+* 业务里面的组件代码大小
 
 
+
+### 30. webpack 4的优化
+
+* v8带来的优化：`for...of...`、`Map`、`Set`等API
+
+* 默认使用更快的md4 Hash算法
+
+* 使用字符串方法代替正则表达式
+
+    
+
+### 31. 多进程多实例 -- 加速构建
+
+> webpack4 官方提供的 thread-loader。（此前的可选方案：`happpack`,作者不再维护了）。
+
+**原理**：每次webpack解析一个模块，`thread-loader` 会将模块及其依赖分配到worker中（每个worker 都是一个nodejs 进程）。
+
+```JavaScript
+modules.exports = {
+    module: {
+        rules: [
+            {
+                test: /\.js$/,
+                use: [
+                    'thread-loader',
+                    'babel-loader',
+                    ...
+                ]
+            }
+        ]
+    }
+}
+```
+
+
+
+### 32. 多进程多实例 -- 加速压缩
+
+`terser-webpack-plugin`开启 `parallel` 参数
+
+```JavaScript
+const TerserPlugin = require('terser-webpack-plugin');
+
+module.exports = {
+    optimization: {
+        minimizer: [
+            new TerserPlugin({
+                parallel: true
+            })
+        ]
+    }
+}
+```
 
 
 
