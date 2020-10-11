@@ -904,7 +904,9 @@ module.exports = {
 
     
 
-### 31. 多进程多实例 -- 加速构建
+### 31. 构建速度优化
+
+#### 31.1 多进程多实例 -- 加速构建
 
 > webpack4 官方提供的 thread-loader。（此前的可选方案：`happpack`,作者不再维护了）。
 
@@ -929,7 +931,7 @@ modules.exports = {
 
 
 
-### 32. 多进程多实例 -- 加速压缩
+#### 31.2 多进程多实例 -- 加速压缩
 
 `terser-webpack-plugin`开启 `parallel` 参数
 
@@ -949,19 +951,118 @@ module.exports = {
 
 
 
+#### 31.3 进一步分包 -- 预编译资源模块
+
+**思路**: 将 `react`、`react-dom`、`react-redux` 基础包 和 业务基础包 打包成一个文件。
+
+**方法**：1. 使用 `DLLPlugin` 进行分包；2. 使用 `DllReferencePlugin` 对 `manifest.json`引用。
+
+**代码**：
+
+```JavaScript
+// 分包
+module.exports = {
+    entry: {
+        library: [
+            'react',
+            'react-dom'
+        ]
+    },
+    output: {
+        filename: '[name]_[hash].dll.js',
+        path: path.join(__dirname, 'build/[name]'),
+        library: '[name]'
+    },
+    plugins: [
+        new webpack.DllPlugin({
+            name: '[name]_[hash]',
+            path: path.join(__dirname, 'build/[name]/[name].json')
+        })
+    ]
+}
+// 引用
+module.exports = {
+    plugins: [
+        new webpack.DllReferencePlugin({
+            manifest: path.join(__dirname, 'build/library/library.json')
+        })
+    ]
+}
+```
+
+> 配合 `assets-webpack-plugin`输出文件路径，`htmp-webpack-plugin` 自动注入。
 
 
 
+#### 31.4 利用缓存提高构建速度
+
+**目的**：提高**二次**构建的速度
+
+**思路**：
+
+* `babel-loader` 开启缓存：`babel-loader?cacheDirectory=true`
+* `terser-webpack-plugin`开启缓存 : `{ cache: true }`
+* 使用 `cache-loader` 或者 `hard-source-webpack-plugin`
 
 
 
+#### 31.5 缩小构建目标
+
+**目的**：尽可能地 **少构建** 目标
+
+* 比如：babel-loader 不解析 node_modules
+
+    ```javascript
+    module.exports = {
+        module: {
+            rules: [
+                {
+                    test: '/\.js$/',
+                    loader: 'babel-loader',
+                    exclude: 'node_modules'
+                }
+            ]
+        }
+    }
+    ```
+
+* 减少文件搜索范围：
+
+    * 优化 resolve.modules 配置（减少模块搜索层级）：`modules: [path.resolve(__dirname, 'node_modules')]`
+    * 优化extensions配置：`extensions: ['.js']`，使用时如果有其他后缀，自己添加上去，比如 `data.json`。
+    * 合理使用 `alias`
+
+### 32. 构建体积优化
+
+#### 32.1 图片压缩
+
+使用 `imagemin`：灵活（多定制选项）、可以引入第三方优化插件（pngquant）、支持多种图片格式。
+
+> 配置 `image-webpack-loader`
+
+压缩原理：
+
+1. png：具有透明通道的24位格式转换为 索引透明的8位格式。
+2. jpg：
+
+#### 32.2 删除无用css
+
+> 无用css如何删除？工具举例：
+>
+> * purifyCss：遍历代码，使用已经使用到了的 css class
+> * uncss：通过jsdom加载html，postcss预处理器解析，`document.querySelector`识别使用到的选择器。
+
+`purgecss-webpack-plugin` 配合 `mini-css-extract-plugin` 使用。
+
+#### 32.3 动态Polyfill
+
+> polyfill service: `polyfill.io`
 
 
 
+### 33. 源码分析
 
-
-
-
+#### 33.1 启动过程分析
 
 
 
