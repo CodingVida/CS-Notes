@@ -1064,5 +1064,11 @@ module.exports = {
 
 #### 33.1 启动过程分析
 
+* 查找入口文件
+    * 执行 `webpack --config webpack.config.js`时，npm 会让命令行工具进入 `node_modules/.bin`目录，查找是否有 `webpack.sh` 或 `webpack.cmd`文件，有则执行，无则报错。
+    * 执行时，上述脚本文件将入口正确执行 `node_modules/webapck/bin/webpack.js`。
+* 分析入口文件：
+    * `webpack.js` 寻找 webapck-cli（或webpack-command），执行cli命令。
+
 
 

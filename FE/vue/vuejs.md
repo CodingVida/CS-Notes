@@ -1,0 +1,110 @@
+[TOC]
+
+
+
+### 1. Vue的生命周期
+
+> vue的生命周期指的是，组件从创建到销毁的一系列过程。
+
+各个阶段分别为：创建前后、挂载前后、更新前后、销毁前后。
+
+* 初始化 事件 和 生命周期钩子
+    * `beforeCreate`
+* 初始化 依赖注入 和 响应式数据  => **创建实例**
+    * `created`
+* 模板编译：`render function`
+    * `beforeMount`
+* **挂载** 到dom节点上
+    * `mounted`
+* 响应式数据更新
+    * `beforeUpdate`：可以对被移除的元素做操作（比如移除监听器）；但一定不能更新数据，否则会重新触发beforeUpdate，造成死循环。
+* 虚拟dom渲染，打补丁
+    * `updated`
+* 调用 `$destroy()`
+    * `beforeDestroy`
+* 销毁实例
+    * `destroyed`
+
+除此之外，对于被 `keep-alive` 包裹的组件（被缓存到内存），还有 `activated` 和 `deactivated` 两个钩子方法。
+
+
+
+### 2. 组件间通信
+
+#### 2.1 父子
+
+* `props` + `$emit`
+* `parent.$refs.child` + `child.$parent`
+* `provide/inject` => **祖先后代**通信
+
+#### 2.2 兄弟间
+
+* `eventBus`
+* 状态提升
+* `$parent.$refs.brother`
+
+#### 2.3 任意
+
+* `eventBus`
+* `vuex`
+
+
+
+### 3. computed 和 watch 的差异
+
+* `computed`通过计算得到一个新的属性，并挂载到vue实例上；`watch`是监听已经存在的挂载在vm上的数据，同理，`watch`可以监听computed
+* `computed` 本质上是一个惰性的观察者，具有 **缓存能力**，只有当依赖发生变化时，computed才会重新计算；watch则是当数据发生变化时，执行相应的handle。
+* 在使用场景上，`computed`适合 一个数据 被 多个数据影响的情况；`watch`适合 多个数据 被 一个数据影响的情况。
+
+
+
+#### 4. key的作用
+
+​	`key`主要用于 vue 的虚拟DOM算法，在新旧nodes对比时辨识VNodes，高效更新虚拟DOM。
+
+​	如果不用 `key`，vue会使用一种 最大限度减少动态元素 并且 尽可能就地复用相同类型元素 的算法；使用`key`时，vue会基于key的变化重新排列元素顺序，并且移除key不存在的元素。
+
+​	具体场景分为两种：
+
+* `v-if`
+    * 不使用key时，如果切换的元素是相同类型的，会就地复用，比如输入框会出现输入内容不变的情况。
+* `v-for`
+    * 同理，不用key时，就地复用。
+
+
+
+### 5. Vue-router 的导航守卫
+
+分三个层级：
+
+* 全局钩子：
+    * `beforeEach`
+    * `afterEach`
+* 路由独享：
+    * `beforeEnter(: to, from, next) => { next() }`
+* 组件内
+    * `beforeRouteEnter`
+    * `beforeRouteUpdate`
+    * `beforeRouteLeave`
+
+
+
+完整的导航解析流程：
+
+1. 导航被触发。
+2. 在失活的组件里调用 `beforeRouteLeave` 守卫。
+3. 调用全局的 `beforeEach` 守卫。
+4. 在重用的组件里调用 `beforeRouteUpdate` 守卫 (2.2+)。
+5. 在路由配置里调用 `beforeEnter`。
+6. 解析异步路由组件。
+7. 在被激活的组件里调用 `beforeRouteEnter`。
+8. 调用全局的 `beforeResolve` 守卫 (2.5+)。
+9. 导航被确认。
+10. 调用全局的 `afterEach` 钩子。
+11. 触发 DOM 更新。
+12. 调用 `beforeRouteEnter` 守卫中传给 `next` 的回调函数，创建好的组件实例会作为回调函数的参数传入。
+
+
+
+### 6. 一句话面试题
+
