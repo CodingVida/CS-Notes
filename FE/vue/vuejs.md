@@ -108,3 +108,19 @@
 
 ### 6. 一句话面试题
 
+
+
+
+
+### 7. Vue3 使用 Proxy 重构的原因
+
+首先罗列 `Object.defineProperty`的缺点：
+
+1. `Object.defineProperty(obj, key, desc)` 只能监听 **对象** **属性**的改变，如果有深度嵌套的对象，需要再次绑定；
+2. `Object.defineProperty()` 不能监听到数组引用不变的操作，比如 push、pop（vue2对这些方法进行了改写，但index改变仍然无法监测到）。
+
+关于`Proxy`的优点：
+
+1. defineProperty是对 **属性** 进行劫持，而 Proxy 是对 **对象** 进行劫持。
+2. 可以劫持数组的变化。
+
