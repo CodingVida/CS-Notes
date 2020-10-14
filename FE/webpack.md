@@ -1070,5 +1070,13 @@ module.exports = {
 * 分析入口文件：
     * `webpack.js` 寻找 webapck-cli（或webpack-command），执行cli命令。
 
+#### 33.2 webpack-cli
 
+大体分为三步：
+
+1. 引入 `yargs` 对命令行进行定制
+2. 分析命令行参数，对各个参数进行转换，组成编译配置项
+3. 引入 `webpack`，出入配置项进行编译和构建
+
+> yargs: 命令行工具包，提供命令和分组参数，动态生成 help 信息。
 
