@@ -50,7 +50,7 @@
     2. 解析后，浏览器引擎会通过 DOM Tree 和 CSS Rule Tree 构建 Render Tree。
         * Render Tree 的节点称为 渲染对象，因不可见的DOM元素不添加到渲染树种，渲染树不与DOM Tree 一一对应。
         * 浏览器构建完 Render Tree 之后进入布局阶段，计算每一个节点在页面上的位置和大小，也可称之为回流reflow。
-    3. 布局结算后进入绘制阶段，调用渲染对象的 `paint` 方法（底层是Native GUI的API）将其显示在屏幕上。
+    3. 布局结算后进入绘制阶段，调用渲染对象的 `paint` 方法（底层是Native GUI的API）将其绘制显示。
 
 2. 渲染过程遇到JS文件？
 
