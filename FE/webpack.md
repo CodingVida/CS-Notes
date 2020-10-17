@@ -1062,7 +1062,9 @@ module.exports = {
 
 ### 33. 源码分析
 
-#### 33.1 启动过程分析
+#### 33.1 概述
+
+**1. 启动过程分析**
 
 * 查找入口文件
     * 执行 `webpack --config webpack.config.js`时，npm 会让命令行工具进入 `node_modules/.bin`目录，查找是否有 `webpack.sh` 或 `webpack.cmd`文件，有则执行，无则报错。
@@ -1070,7 +1072,7 @@ module.exports = {
 * 分析入口文件：
     * `webpack.js` 寻找 webapck-cli（或webpack-command），执行cli命令。
 
-#### 33.2 webpack-cli
+**2. webpack-cli**
 
 大体分为三步：
 
@@ -1079,4 +1081,60 @@ module.exports = {
 3. 引入 `webpack`，出入配置项进行编译和构建
 
 > yargs: 命令行工具包，提供命令和分组参数，动态生成 help 信息。
+
+ **3. hooks与插件机制**
+
+`tappable`：核心内容 `compiler`继承了 tappable，可以将webpack理解为一种基于事件流的编程范例，它的运行过程是一系列插件的运行过程。 
+
+
+
+#### 33.2 运行流程 -- 准备阶段
+
+- 配置准备：option、environment 
+- plugin注入
+- 调用run方法
+
+
+
+#### 33.3 运行流程 -- 构建阶段
+
+**compiler hooks：**
+
+* 流程相关
+    * (before--)run
+    * (before--/after--)compiler
+    * make
+    * (after--)emit
+    * done
+* 监听相关
+    * watch-run
+    * watch-close
+* ...
+
+#### 33.4 运行流程 -- 文件输出
+
+
+
+
+
+### 34. 简易webpack
+
+> 加深对构建工具的理解。
+
+**知识储备**：
+
+1. 模块化：增强代码可读性和维护性
+2. AST：抽象语法树（Abstract Syntax Tree）。
+
+**基本功能**：
+
+1. es6 转为 es5
+    * babylon生成ast
+    * babylon-core将ast重新生成源码
+2. 可以分析模块之间的依赖关系：通过 `babel-traverse` 的 `ImportDeclaration` 方法获取依赖属性
+3. 生成的js文件可以在浏览器中运行。
+
+
+
+
 
