@@ -1132,9 +1132,57 @@ module.exports = {
     * babylon生成ast
     * babylon-core将ast重新生成源码
 2. 可以分析模块之间的依赖关系：通过 `babel-traverse` 的 `ImportDeclaration` 方法获取依赖属性
-3. 生成的js文件可以在浏览器中运行。
+3. 生成的js文件可以在浏览器中运行：立即执行函数表达式IIFE
 
 
+
+### 35. webpack loader
+
+* 定义：loader只是一个导出为函数的JavaScript模块
+
+* 执行顺序：从后到前
+    * 串行
+    * 组合函数：`compose= (f, g) => (...args) => f(g(...args));`
+* `loader-runner`:
+    * 允许不安装webpack的情况下运行loader
+    * 作用：
+        * webpack的依赖，使用它来运行loader
+        * 开发调试loader
+* 复杂场景开发：
+    * 获取常数：`loader-utils`
+    * 错误抛出：`throw` || `this.callback(new Error())`
+    * 异步：`callback = this.async();`
+        * 成功：`callback(null, data)`
+        * 错误：`callback(err)`
+    * 输出文件：`this.emitFile`
+
+
+
+> 实战：雪碧图生成（利用 `spritesmith`）
+
+
+
+### 36. webpack plugin
+
+* 基本结构：提供 `apply(compiler)`方法的对象
+
+* 复杂场景：
+
+    * 获取参数：`this.options = options`
+    * 错误处理：
+        * `throw`
+        * `compilation.warning.push("waring")` | `compilation.errors.push("error")`
+    * 文件写入：
+        * 需要用到 `webpack-sources`
+        * 挂载到 `compilation.assets`对象上：`compilation.assets[name] = new RawSource("demo")`
+    * 插件拓展：暴露 `hooks` 的方式进行自身拓展，比如 `webpack-html-plugin`
+
+    
+
+> 实战：压缩插件（使用JSZip
+>
+> 1. 文件名可以传入
+> 2. 使用compiler上的hook实现文件写入
 
 
 
