@@ -70,11 +70,13 @@ Linux的缔造者Linux Torvalds 吸取使用 BitKeeper 的经验教训开发。
     * `git push --delete <remoteName><branchName>`：删除远程仓库上多余的分支
 * 合并：
     * `git merge branchName`
+        * `--no-ff`：保留分支的提交记录（默认）。
+        * `--ff`（fast-forward，快进）：将分支提交也合并过来。
     * `git rebase`
 * 推送：`git push origin`
 * 拉取：
-    * `git pull`：`git fetch + git merge`
-    * `git pull --rebase`: `git fetch + git rebase`
+    * `git pull`：`git fetch + git merge`：会多出一次 无意义的 commit信息，表明merge了，提交线是分叉的。
+    * `git pull --rebase`: `git fetch + git rebase`：合并回一条提交线。（好看，方便于code-review）
 
 #### 4.5 忽略不跟踪文件
 
