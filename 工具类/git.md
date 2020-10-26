@@ -44,6 +44,13 @@ Linux的缔造者Linux Torvalds 吸取使用 BitKeeper 的经验教训开发。
     * 具体某个人的：`git log --author=name`
     * 参数：`--pretty=`，`--oneline`
 * `git reflog`：记录了每一次git命令。
+* 提交信息：
+    * `git diff`：当前工作区改点（详细）
+    * `git status`：当前修改文件
+    * `git diff hash1 hash2`：两次提交的区别
+    * `git diff branch1 branch2`：两个分支的区别
+    * `git log`
+    * `git log --pretty=oneline`：提交历史缩减到一行
 
 #### 4.3 撤销操作
 
@@ -53,10 +60,117 @@ Linux的缔造者Linux Torvalds 吸取使用 BitKeeper 的经验教训开发。
 
 #### 4.4 分支
 
+* 列表：`git branch -al`
 * 新建：`git branch branchName`
 * 切换：`git checkout branchName`
 * 新建并切换：`git checkout -b branchName`
-* 删除：`git branch -d branchName`
-* 合并：`git merge branchName`
+* 删除：
+    * `git branch -d branchName`：删除已经合并过的了
+    * `git branch -D branchName`：强制删除本地分支
+    * `git push --delete <remoteName><branchName>`：删除远程仓库上多余的分支
+* 合并：
+    * `git merge branchName`
+    * `git rebase`
 * 推送：`git push origin`
+* 拉取：
+    * `git pull`：`git fetch + git merge`
+    * `git pull --rebase`: `git fetch + git rebase`
+
+#### 4.5 忽略不跟踪文件
+
+`.gitignore`
+
+
+
+#### 4.6 用户配置
+
+````bash
+git config --list
+git config --global user.name "yoto"
+git config --global user.email "xxx@xx.com"
+````
+
+
+
+#### 4.7 回退
+
+* reset：本质上是指针后移。
+    * `--mixed`：默认方式，只回退commit信息，源代码不变，文件修改退回**工作区**。
+    * `--soft`：只回退commit信息，源代码不变，文件修改退回**暂存区**。
+    * `--hard`：回退整个版本（包括commit提交记录和源码都回退）。
+* revert：本质上是指针后移再前移覆盖。
+    * 先 revert
+    * 再重新提交。
+    * 如果merge到别的分支，
+
+### 5. git 高阶操作
+
+#### 5.1 三种合并方式
+
+> merge、cherry-pick、patch
+
+![image-20201026160445959](../images/git.md)
+
+
+
+#### 5.2 删除git缓存文件
+
+**情况：**有些情况开发者把原有不需要提交的代码提交到了远端仓库，再使用.gitignore忽略文件不生效。哪怕我们删除后再提交也没有办法忽略。这种情况下我们应该怎么解决？
+
+**方法：**我们可以使用git rm —cache 删除原来git跟踪的文件缓存，再在.gitignore里面添加忽略文件
+
+```bash
+## 当我们需要删除暂存区或分支上的文件, 同时工作区也不需要这个文件了, 可以使用
+git rm file_path 
+
+## 当我们需要删除暂存区或分支上的文件, 但本地又需要使用, 只是不希望这个文件被版本控制, 可以使用
+git rm --cached file_path       // PS: file_path 为文件路径
+```
+
+
+
+#### 5.3 强制提交
+
+**情况**：对于多人同时开发，有些时候我们会遇到版本管理混乱的情况，远端版本错误了，但本地版本是正确的。 如何才能让强制更新远端版本，保持和本地工作区环境一样？
+
+**方法**：强制push本地正确的版本，但是慎用。因为它是不可逆转的。
+
+```bash
+git push origin master --force
+```
+
+
+
+#### 5.4 版本回退
+
+**情况**：有些时候开发者需要退回到某次正确的提交记录，有些时候开发者的commit错误了，这时候可以使用 git revert 和 git reset。
+
+**方法**：revert | reset
+
+
+
+```bash
+## 强制回退到某次提交
+git reset --hard hash
+git push origin --force
+
+## 回退到某提提交，保存提交commit记录, 重新commit
+git revert hash
+git add .
+git commit -m "."
+git push origin
+```
+
+#### 5.5 Tag
+
+```bash
+## 创建tag
+git tag -a daily/0.0.1 -m "add develop file" // 创建标注标签
+git tag daily/0.0.1 // 简单创建tag
+## 分享tag到远端
+git push origin [tagname]
+git push origin --tags 
+## 如何已某个tag创建分支
+git checkout -b <newbranch> <tagname>
+```
 
