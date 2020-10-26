@@ -16,12 +16,12 @@
 ### 3.行内元素
 
 * 一个行内元素只占用它对应标签边框所含的空间。
-* a、b、span、label、input、button、img（同时还是置换元素，可设置margin、padding）等。
+* a、span、label、input、button、img（同时还是置换元素，可设置margin、padding）等。
 
 ### 4.块级元素
 
 * 占满父级容器的整个宽度。
-* div、p、ul、ol、li、dl、dt、dd、h1~h6、table、form等
+* header、main、footer、div、p、ul、ol、li、dl、dt、dd、h1~h6、table、form等
 
 ### 5.行内、块级元素的区别
 
@@ -43,14 +43,14 @@
 
 1. 大体流程
 
-    1. 浏览器解析三个东西：
+    1. 浏解析文件：
         	* HTML/SVG/XHTML，webkit会有三个c++的类对应处理，解析它们产生DOM Tree。
          * CSS：解析产生CSS Rule Tree。
-         * JavaScript：主要是通过 DOM API 和 CSSOM API 来操作DOM Tree 和 CSS Rule Tree。
+         * ~~JavaScript：主要是通过 DOM API 和 CSSOM API 来操作DOM Tree 和 CSS Rule Tree。~~
     2. 解析后，浏览器引擎会通过 DOM Tree 和 CSS Rule Tree 构建 Render Tree。
         * Render Tree 的节点称为 渲染对象，因不可见的DOM元素不添加到渲染树种，渲染树不与DOM Tree 一一对应。
-        * 浏览器构建完 Render Tree 之后进入布局阶段，计算每一个节点在页面上的位置和大小，也可称之为回流reflow。
-    3. 布局结算后进入绘制阶段，调用渲染对象的 `paint` 方法（底层是Native GUI的API）将其绘制显示。
+    3. 浏览器构建完 Render Tree 之后进入布局阶段，计算每一个渲染节点在页面上的位置和大小，也称之为回流reflow。
+    4. 布局结算后进入绘制阶段，合成线程合成图块，栅（shan）格化线程进行栅格化生成位图，将位图传输给显卡，由此显示在显示器上（显卡前后缓冲区图片）。
 
 2. 渲染过程遇到JS文件？
 
@@ -370,4 +370,24 @@ datepickers, range 以及 color。
 
 协议相对URL，protocol-relative UR：浏览器将以相同的协议请求页面中的资源，避免出现警告信息。
 
+### 45. HTML5 和 HTML4的区别
+
+* 标准方面：不再基于SGML，而是形成自己的一套标准；
+* 标签方面：
+    * 新增语义化标签：比如 `header、main、articel、section、footer、nav` 等
+    * 废除一些美化标签，使得样式与结构分离更彻底，比如 `center、big` 等
+* 属性方面：
+    * 表单属性增强，主要是 input属性的增强，比如 `type、autofocus、placeholder`；
+    * 其他标签属性，比如 `meta`的 `chartset`、script的 `async`和 `defer`
+* 存储方面：
+    * 新增WebStorage，包括localStorage和sessionStorage（两者的区别？）
+    * 引入IndexBD，允许浏览器创建数据库表和存储数据。（WebSql不再是标准了）
+        * 诞生的背景在于，现有本地存储方案不适合存储大量数据：Cookie不大于4KB，且会被请求携带回服务器；LocalStorage的大小在2.5~10MB之间，且不提供搜索功能，也不能建立索引。
+        * 特点：键值对、异步、支持事务（一步错，整个回滚）、同源限制（数据库对应创建它的域名，不能跨域）、空间大、支持二进制（ArrayBuffer和Blob对象）。
+    * 引入程序缓存器（Application Cache），提供web缓存能力，使得可以离线访问，为PWA（Progressive Web APP，渐进式web应用）提供底层支持。（ps：pwa，如其名，更像原生app的web应用）
+        * 创建 manifest文件，后缀为 `.appcahce`
+        * 文件分为三个部分：CACHE MANIFEST、NETWORK、FALLBACK
+        * 更新缓存：
+            * 用户删除了缓存
+            * manifest文件更新（一般通过修改注释行，比如 `# 2020-10-1 V1.0.1`）
 
