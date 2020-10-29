@@ -269,7 +269,7 @@ module.exports = {
 
 #### 11.2 原理分析
 
-    ![](../images//image-20200920235002543.png)
+![](../images//image-20200920235002543.png)
 
 
 ​    

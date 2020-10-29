@@ -552,7 +552,7 @@ js引擎执行代码的过程是一个边解析边执行的过程：在执行一
 
 ### 24. ['1', '2', '3'].map(parseInt)
 
-> API参数理解。
+> API参数理解。1,NaN,NaN
 
 ### 25. js延迟加载
 
@@ -830,9 +830,15 @@ v8因此对标记进行了优化，将原本的标记过程分为多步，交替
 * 无效的DOM引用：比如js中持有对某个dom节点的引用，但文档删除了它，此时这个dom节点会继续存活在内存中。
 * 不合理的闭包使用。
 
-36. #### 实现一个页面操作不会整页刷新的网站，并且能在浏览器前进、后退时正确响应
+36. #### 实现一个页面操作不会整页刷新的网站，并且能在浏览器前进、后退时正确响应。
 
-> `pushState + ajax`
+> 比如内容分页页面：要使得前进后退不会导致页面整页刷新，而是浏览过的分页页码的刷新
+>
+> `location.hash=#1`  和 `pushState + ajax` 两种方案。
+
+* `history.pushState(state, '', url);` url参数值会替换地址栏中的url，但不会去加载它，明显的好处是刷新的时候，浏览器就会去加载；
+* `history.replaceState(state, '', url);`
+* `window.onpopstate = event => event.state`
 
 ### 37.  移动端点击延迟
 
@@ -840,10 +846,14 @@ v8因此对标记进行了优化，将原本的标记过程分为多步，交替
 * 是因为移动端有双击缩放的操作，因此浏览器在click之后要等待300ms，看是否有再一次点击，来判断是否是缩放。
 * 解决：
     * meta中禁止缩放 user-scalable=0
+    
     * js库fastclick处理
+    
     * meta设置viewport为 ideal viewport，width=device-width
+    
+        
 
-#### 38. 移动端点击穿透
+### 38. 移动端点击穿透
 
 ​	假如页面上有两个元素A和B。B元素在A元素之上。我们在B元素的touchstart事件上注册了一个回调函数，该回调函数的作用是隐藏B元素。我们发现，当我们点击B元素，B元素被隐藏了，随后，A元素触发了click事件，因为 300ms 后触发 click事件。
 
@@ -946,31 +956,33 @@ function getFileExtension(filename) {
 
 js引擎的执行过程可以简单描述为：
 
-1. 函数(实际上是执行上下文)压入调用栈形成栈帧，执行其中的同步代码，如果遇到函数，继续压入栈，然后进入这个执行环境执行代码；当执行到异步任务时，将其移交给 Web APIS处理，接着执行同步任务，直到栈为空；
-2. 与此同时，Web APIs 处理异步任务事件（DOM、Ajax、Timeout等），完成事件后，将回调函数放入回调队列 Callback Queue （也叫事件队列 Task Queue）中；
-3. 调用栈为空时，**主线程** 将 回调队列中的 **一个** 回调函数压入调用栈中，执行其中的同步代码...
-
-如此反复，形成一个无限的过程，因此称为“事件循环” Event Loop。
+1. JavaScript主代码执行，如果遇到函数，继续压入栈，然后进入这个执行环境执行代码；当执行到异步任务时，将其移交给 Web APIS处理，接着执行同步任务，直到调用栈为空；
+2. 与此同时，Web APIs 处理异步任务事件（DOM响应、Ajax、Timer等），完成事件后，将回调函数放入回调队列 Callback Queue （也叫事件队列 Task Queue）中；
+3. 调用栈为空时，**主线程** 取出回调队列中的回调函数，压入栈中执行。如此反复，形成一个无限的过程，因此称为“事件循环” Event Loop。
 
 ![](https://picb.zhimg.com/80/v2-da078fa3eadf3db4bf455904ae06f84b_720w.jpg)
 
 
 
- 以上对事件循环的描述是一个宏观的过程，实际上因为异步任务之间并不相同，也因此有执行优先级的差异。不同的异步任务被分为两大类：宏任务（Micro Task）和 微任务（Micro Task）。
+ JavaScript中有两类任务类型：宏任务（Macro Task）和 微任务（Micro Task）。
 
 * 宏任务：
-    * script脚本的执行
-    * setTimeout、setInterval、setImmediate一类的定时任务
+    * 执行script主代码块；
+    * setTimeout、setInterval、setImmediate一类的timer定时任务；
     * I/O操作
 * 微任务：
     * promise
     * mutationObserve: 对dom树变动进行监测
+    * Object.observe
+    * process.nextTick
 
-也因此也将事件队列区分为 **微任务队列** 和 **宏任务队列**。
-
-在调用栈空了的情况下，如果微任务队列不为空，首先会先将之全部执行完毕，而后在宏任务队列中取出一个事件。换句话说，在一次事件循环中，微任务永远在宏任务之前执行，且全部执行完。
+也因此也将事件队列区分为 **宏任务队列** 和 **微任务队列**。在一次事件循环中，宏任务执行完毕，会立即执行完这期间产生的微任务，然后从宏任务队列中取出一个事件执行。（ps：执行都是在执行栈中）
 
 ```javascript
+setTimeout(function () {
+    console.log(0);
+    Promise.resolve(4).then(console.log)
+});
 setTimeout(function () {
     console.log(1);
 });
@@ -984,10 +996,20 @@ new Promise(function(resolve,reject){
 
 // 2
 // 3
+// 0
+// 4
 // 1
 ```
 
 
+
+> **Node.js**中Event Loop和浏览器中Event Loop有什么区别 ?
+>
+> * 第一点：node的宏任务队列会分为好几种类型，并且他们的优先级也不同：
+>     * setTimout/setInterval属于 timer 类型，优先级最高；
+>     * setImmediate 属于 check类型，次之；
+>     * socket的close事件之类的 callback类型 在最末尾；
+> * 第二点：`proces.nextTick` 是微任务，但要优先于其他的微任务执行。
 
 ### 45. 深浅拷贝
 
@@ -1360,3 +1382,39 @@ function myInterval (fn, timeout) {
 代码执行是基于执行栈的，但在一个函数中调用另一个函数的时候，栈中会保留当前执行上下文，同时基于新函数创建新的执行上下文入栈。使用**尾调用**时，因为已经是函数的最后一步了，可以不用保留当前的执行上下文，从而可以节省内存。这就是尾调用优化。
 
 默认情况下，js不支持尾调用优化。es6的尾调用优化只在 严格模式 下开启。
+
+
+
+### 60. Object.is
+一般情况下，`Object.is`的行为跟 `===` 一样，不同的是，Object.is 会对 `+0/-0` 以及 `NaN` 进行特别处理，认为它们不相等。
+```javascript
+// pollyfill
+if (!Object.is) {
+    Object.defineProperty(Object, 'is', {
+        value: function (x, y) {
+            if (x === y) {
+                // +0/-0: 1/-0 => -Infinity
+                return x !== 0 || 1 / x === 1 / y;
+            } else {
+                // NaN
+                return x !== x && y !== y;
+            }
+        }
+    })
+}
+
+```
+
+
+
+61. slice、substring、substr
+
+* slice：
+    * [begin, end] ，不包括end。
+    * 参数为负数时，加上长度再运算
+* substring：
+    * [begin, end] ，不包括end。
+    * 参数为负数时，转为0
+* substr：
+    * [begin, count] 。
+    * 第一个参数为负数时，加上长度再运算

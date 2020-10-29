@@ -71,7 +71,7 @@
 
 ### 3. 伪类和伪元素
 
-​	css3 引入伪类和伪元素是为了格式化文档树以外的信息，比如第一个字母(first-letter)。
+​	css3 引入伪类和伪元素是**为了格式化文档树以外的信息**，比如第一个字母(first-letter)。
 
  * 伪类：单引号`:`。用于当**已有元素**处于某个状态时，添加对应的样式是根据用户行为而动态变化的。
 
@@ -142,13 +142,13 @@ a标签有四种状态：链接访问前、链接访问后、鼠标滑过、激�
 ### 8. 定位
 
 * absolute
-> 生成绝对定位的元素，相对于值不为static的第一个父元素的 paddingbox进行定位（即计算时需要加上padding）。
+> 绝对定位，相对于值不为static的第一个**父元素的 paddingbox** 进行定位（即计算时需要加上padding）。
 
 * fixed（老IE不支持）
-> 生成绝对定位的元素，相对于浏览器窗口进行定位。
+> 固定定位，相对于浏览器窗口进行定位。
 
 * relative
-> 生成相对定位的元素，相对于其元素本身所在正常位置进行定位。
+> 相对定位，相对于其元素本身所在正常位置进行定位。
 
 * static
 
@@ -169,7 +169,7 @@ a标签有四种状态：链接访问前、链接访问后、鼠标滑过、激�
     * 任何一个容器都可以指定弹性布局（行内元素也可以指定为flex布局）
     * 采用flex布局的元素称为 **Flex容器（flex container）**，其子元素自动称为容器成员，称为 **Flex项目（flex item）**
 
-    * 设置flex布局后，子元素的 flaot、clear 和 vertical-align 属性将失效
+    * 设置flex布局后，子元素的 float、clear 和 vertical-align 属性将失效
     * 容器默认存在两根轴线：主轴（main axis）和 交叉轴（cross axis）。主轴默认在水平方向上。
 
 2. 容器属性 x6
@@ -211,6 +211,18 @@ a标签有四种状态：链接访问前、链接访问后、鼠标滑过、激�
 ### 11. 纯css 三角形
 
 > 相邻边框连接处的均分原理。
+
+比如，实现右三角，宽高10px：
+
+```css
+.triangle {
+    width: 0;
+    height: 0;
+    border-width: 5px 0 5px 10px;
+    border-style: solid;
+    border-color: transparent transparent transparent red;
+}
+```
 
 
 
@@ -254,10 +266,10 @@ a标签有四种状态：链接访问前、链接访问后、鼠标滑过、激�
 
 * 一个元素的位置和尺寸经常受其包含块的影响，在赋予百分比值时，这些值的计算要通过包含块来计算。
 
-* 确定包含块：确定一个元素的包含块完全依赖于这个元素的 position属性。
+* 确定包含块：确定一个元素的包含块**完全依赖于**这个元素的 position属性。
 
-    * position为 static/relative/sticky时，包含块由它的最近祖先块元素（比如 block、inline-block或list-item元素）的内容区边缘组成（content-box）。
-    * position为absolute时，由最近的position不是static（也就是为relative、absolute、fixed或sticky）的祖先元素的 内边距边缘（padding-box）组成。
+    * position为 static/relative/sticky时，包含块由它的最近祖先块元素（比如 block、inline-block或list-item元素）的**内容区**边缘组成（content-box）。
+    * position为absolute时，由最近的position不是static（也就是为relative、absolute、fixed或sticky）的祖先元素的 **内边距**边缘（padding-box）组成。
     * position为fix时，由viewport或page area组成（也可以称之为初始包含块）。
 
     > 根元素<html>所在的包含块是一个被称为 初始包含块 的矩形。
@@ -285,11 +297,11 @@ a标签有四种状态：链接访问前、链接访问后、鼠标滑过、激�
 
 * 定义：base64编码是一种图片处理格式，通过特定算法将图片编码成一长串字符串，在页面上显示的时候，可代替图片上的url属性。
 
-    > 早起传输协议只能传输可打印字符；
+    > 早期传输协议只能传输可打印字符；
     >
-    > base64 只支持64个可打印字符（A-Za-z0-9+/）；
+    > base64 只支持64个可打印字符`A-Za-z0-9+/`；
     >
-    > 每三个8bit的字节转换为四个6bit的字节（其高位填充00），理论上转换后文件增大 1 / 3。
+    > 每三个8bit的字节转换为四个6bit的字节（其高位填充00），理论上转换后文件增大 **1 / 3**。
 
 * 优点：
 
@@ -309,19 +321,31 @@ a标签有四种状态：链接访问前、链接访问后、鼠标滑过、激�
         * 若为 absolute 或 fixed：float无效、display转换
         * 否则：float
             * none：
-                * 不是根元素：指定值
-                * 根元素：转换
+                * 不是根元素：display为原来的指定值
+                * 根元素：display转换值为 block或table
             * 否则：display转换
+
+>  总的来说，可以把它看作是一个类似**优先级**的机制，"position:absolute"和"position:fixed"优先级最高，有它存在的时候，浮动不起作用，'display'的值也需要调整；其次，元素的'float'特性的值不是"none"的时候或者它是根元素的时候，调整'display'的值；最后，非根元素，并且非浮动元素，并且非绝对定位的元素，'display'特性值同设置值。
 
 ### 21. BFC
 
 * BFC，block formatting context，块级格式化上下文。一个元素形成BFC之后，就相当于一个隔离区域，布局不影响到外部元素，外部元素也不会影响到bfc中的元素。
-* 形成BFC
+* 触发条件
     * 根元素或包含根元素的元素
-    * float不为none
-    * position为 absolute 或 fixed
-    * visibility不为 visible
-    * display为 inline-block | flex | inline-flex | table-cell | table-caption
+    * 浮动元素，float不为none
+    * 绝对定位元素，position为 absolute 或 fixed
+    * overflow值不为visible的块元素
+    * display为 `inline-block` | flow-root | table-cell | table-caption的元素
+* 约束规则
+    * BFC内的盒子垂直方向上排列（可以看做BFC中有一个常规流）；
+    * 外边距折叠（margin collapse）只发生在同一BFC的块元素之间；
+    * 水平方向上，盒子的左边缘与BFC的左边缘对齐，浮动元素也是如此；
+    * BFC区域不会与外部浮动元素重叠，而是会依次排列；
+    * 计算BFC的高度时，内部浮动元素要参与计算。
+* 应用：
+    * 垂直外边距重叠问题（比如父子块元素margin-top重叠）
+    * 清除浮动，比如父元素设置无副作用的 `display：flow-root`创建一个根元素流动布局上下文，形成BFC；
+    * 自适应两列布局（左侧 `float: left`, 右侧 `overflow：hidden`)
 
 ### 22. margin重叠
 
@@ -343,7 +367,7 @@ a标签有四种状态：链接访问前、链接访问后、鼠标滑过、激�
 * 布局规则：
     * 内部的内联盒子水平方向一个接一个放置
     * 一行不够自动切换到下一行
-    * IFC的高度有内部最高的内联盒子决定
+    * IFC的高度由内部最高的内联盒子决定
 
 ### 24. 清除浮动
 
@@ -382,7 +406,7 @@ a标签有四种状态：链接访问前、链接访问后、鼠标滑过、激�
 
 ### 29. css3 all属性
 
-* 是除了 unicode-bidi 和 direction 这两个控制文本方向属性之外的所有属性的缩写。
+* 是除了 unicode-bidi 和 direction(inherit/ltr/rtl) 这两个控制文本方向属性之外的所有属性的缩写。
 * 三个属性值：
     * initial：初始值
     * inherit：继承父元素的属性值
@@ -392,7 +416,7 @@ a标签有四种状态：链接访问前、链接访问后、鼠标滑过、激�
 
 * 内联元素也可以作为它的包含块
 * 包含块所在的元素不是父级块级元素，而是最近的position不为static的祖先元素。
-* 边界是padding-box
+* 边界是`padding-box`
 
 ### 31. 元素的竖向百分比
 
@@ -402,7 +426,7 @@ a标签有四种状态：链接访问前、链接访问后、鼠标滑过、激�
 ### 32. 响应式设计
 
 * 定义：响应式网站设计是一个网站能够兼容多个终端，而不是为每一个终端做一个特定的版本。
-* 基本原理：通过媒体查询检测不同的设备屏幕尺寸做处理。页面头部必须有meta声明的viewport。
+* 基本原理：通过媒体查询检测不同的设备屏幕尺寸做处理; 页面头部必须有meta声明的viewport。
 
 ### 33.  让Chrome支持小于12px的文字
 
@@ -443,7 +467,7 @@ a标签有四种状态：链接访问前、链接访问后、鼠标滑过、激�
 
 ### 36. 手写动画，最小时间间隔为多少，为什么
 
-多数显示器的默认评率是 `60Hz`，即1s刷新60次，所以理论上最小时间间隔为 1000 / 60 = 16.7 ms。
+多数显示器的默认刷新频率是 `60Hz`，即1s刷新60次，所以理论上最小时间间隔为 1000 / 60 = 16.7 ms。
 
 ### 37. 有一个高度自适应的 div，里面有两个 div，一个高度 100px，希望另一个填满剩下的高度
 
