@@ -455,7 +455,7 @@ a标签有四种状态：链接访问前、链接访问后、鼠标滑过、激�
     * 移动设备上的可见区域，一般为设备的分辨率。
     * 可以通过 `window.innerWidth` 获取。
 
-* `ideal viewport`：理想窗口。
+* `ideal viewport`：理想窗口（是一个抽象概念）。
 
     * 由于layout viewport的大小要比 visual viewport 大，因此需要通过拖动缩放才能看到完整的页面。
 
@@ -540,12 +540,30 @@ a标签有四种状态：链接访问前、链接访问后、鼠标滑过、激�
 
 ### 43. 画一条 0.5px 的线
 
+* tranform: scaleY(0.5)
 
+    ```css
+    .scale-half {
+    	height: 1px;
+        transform: scaleY(0.5);
+        transform-origin: 50% 100%; // 默认情况下值为 50% 50% 0，以元素中心为缩放点，Chrome下会模糊。
+    }
+    ```
+
+    
+
+* svg
+
+    ```css
+    <svg xmlns="" with="100%" height="1px">
+    	<line x1="0" y1="0" x2="100%" y2="0" stroke="#000" />
+    </svg>
+    ```
 
 ### 44. transition 和 animation 的区别
 
 * transition 关注的 css 的属性值
-* animation 是作用于元素本身而不是属性值，可以使用关键帧实现更自由的动画效果。
+* animation 是作用于元素本身而不是属性值，可以使用**关键帧**实现更自由的动画效果。
 
 
 
@@ -577,7 +595,7 @@ a标签有四种状态：链接访问前、链接访问后、鼠标滑过、激�
 * 创建：
     * 页面根元素
     * position为relative、absolute和fixed
-    * css3属性，比如元素的opacity值不是1
+    * 使用css3属性，比如元素的opacity值不是1
 * 层叠水平：stacking level
 	* 决定了同一个层叠上下文中元素在z轴上的显示顺序
 	* 所有元素都有（包括普通元素）
