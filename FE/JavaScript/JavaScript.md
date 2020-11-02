@@ -508,7 +508,7 @@ js引擎执行代码的过程是一个边解析边执行的过程：在执行一
         const Constructor = [].shift.call(arguments);
         const newObj = Object.create(Constructor.prototype);	// 创建新对象 和 设置原型(Object.create的内在逻辑)
         const ret = Constructor.apply(newObj, arguments);
-        return typeof ret === 'Object' ? ret : newObj;
+        return typeof ret === 'object' ? ret : newObj;
     }
     
     // how to use ?
@@ -672,12 +672,11 @@ define(function (require, exports, module) {
 
 ​	它们有两个重大差异：
 
-* CommonJS输出的是一个值的浅拷贝，ES6模块输出的是指的引用。
+* CommonJS输出的是一个值的浅拷贝，ES6模块输出的是值的引用。
+    * es6的import在静态分析时，生成一个类似软链接的 **只读引用**；原始值发生改变时，import加载的值也会改变，因此import还是 **动态引用**。
 * CommonJS模块在运行时加载，ES6模块在编译时输出接口。
-
-第二个差异产生的原因是，CommonJS加载的是一个对象，即 `module.exports`，这个对象只有在脚本运行的时候会生成；而ES6 模块不是对象，它的对外接口只是一种静态定义（export），在代码解析阶段就会生成。
-
-
+    * CommonJS加载的是一个对象，即 `module.exports`，这个对象显然只有在脚本运行的时候会生成；
+    * es6模块不是对象，`export`命令显示地指定输出的代码，import在解析阶段生成引用。
 
 #### 28.5 requirejs的核心原理
 
@@ -893,29 +892,13 @@ function getFileExtension(filename) {
 
 ### 41. 节流防抖
 
-* 防抖
-    * 函数在触发后的n毫秒后执行，如果在这段时间内被再次触发，则重新计时
-    
-    * 可以用在用户点击发送请求的场景中，避免多次点击而重复发送请求
-    
-        ```javascript
-        function debounce (fn, delay) {
-            let timer = null;
-            return function () {
-                const args = arguments;
-                const ctx = this;
-                clearTimeout(timer);
-                timer = setTimeout(() => {
-                    fn.apply(ctx, args);
-                }, delay);
-            }
-        }
-        ```
-    
-* 节流
-    * 在一定时间内多次触发，函数只执行一次。
+
+* 节流(throttle)
+    * 高频事件触发，在n秒内只会触发一次，稀释函数的执行频率。
     
     * 比如在scroll函数的监听事件中，通过节流降低事件的调用评率。
+    
+    * 实现的思路是：计时。
     
         ````javascript
         function throttle (fn, delay) {
@@ -931,6 +914,26 @@ function getFileExtension(filename) {
         	}
         }
         ````
+* 防抖debouce
+    * 函数在触发后的n毫秒后执行，如果在这段时间内被再次触发，则重新计时；
+    
+    * 可以用在用户点击发送请求的场景中，避免多次点击而重复发送请求；或者是输入框输入提供搜索，取最后输入的值查询。
+    
+    * 实现的思路是：setTimeout
+    
+        ```javascript
+        function debounce (fn, delay) {
+            let timer = null;
+            return function () {
+                const args = arguments;
+                const ctx = this;
+                clearTimeout(timer);
+                timer = setTimeout(() => {
+                    fn.apply(ctx, args);
+                }, delay);
+            }
+        }
+        ```
 
 ### 42. escape、encodeURI、encodeURIComponent
 
