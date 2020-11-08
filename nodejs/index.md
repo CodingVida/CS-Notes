@@ -6,6 +6,24 @@
 
 
 
+### require引入的查找逻辑
+
+​	当 node 遇到 `require(x)` 时，区分三种情况讨论如下：
+
+1. x 是内置模块，比如 `http`，直接返回不再查找。
+2. x 是以 **路径分隔符** 开头的，比如 `./` ：首先根据 x 所在的父模块确定绝对路径，然后分两种情况依次处理：
+    1. 先当做文件，依次查找：`x`、`x.js`、`x.json`、`x.node` 文件；
+    2. 找不到则当做目录，依次查找：
+        * `x/package.json(用于读取其中main字段)`
+        * `x/index.js`
+        * `x/index.json`
+        * `x/index.node`
+3. x 不带路径：从父模块开始，依次确定安装目录（node_modules）
+
+如果上述三种情况都未能找到符合条件的文件，则抛出 `Not Found`错误。
+
+
+
 ### 清理 require的缓存
 
 require会自动缓存导入的内容，可以通过 `require.caceh[absolute path]` 获取。
