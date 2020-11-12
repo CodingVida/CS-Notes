@@ -668,3 +668,73 @@ function WelcomeDialog() {
 
 ## HOOK
 
+> 它可以让你在不编写 class 的情况下使用 state 以及其他的 React 特性。
+
+
+
+### 概览
+
+**定义：**
+
+`Hook` 是一些可以在函数组件里“**钩入**” React State 及生命周期等特性的**特殊函数**。`Hook` 不能在 class 组件中使用 —— 这使得你不使用 class 也能使用 React。
+
+**动机：**
+
+* 组件间复用逻辑
+* 复杂组件逻辑混乱（比如订阅与取消订阅的逻辑分散到不同的生命周期中）
+* 难以理解的class
+
+
+
+**内置hook：**
+
+* `useState`
+
+* `useEffect`
+
+    
+
+### useState
+
+像 class 中的 `this.setState`，更新 state 变量总是 **替换** 它而不是合并它。
+
+因此在更新对象时需要留意。
+
+
+
+### useEffect
+
+> 在 React 组件中执行数据获取、订阅或者手动修改 DOM等的这些操作称为“**副作用**”，或者简称为“**作用**”。
+
+`useEffect` 就是一个 Effect Hook，它给函数增加了操作副作用的能力，跟class组件中的 `componentDidMount`、`componentDidUpdate` 和 `componentWillUnmount`具有相同的用途，只是被合并为一个API。
+
+当调用 `useEffect` 时，就是在告诉 React **在完成对 DOM 的更改后运行“副作用”函数**。由于副作用函数是在组件内声明的，所以它们可以访问到组件的 props 和 state。默认情况下，React 会在每次渲染后调用副作用函数 —— **包括**第一次渲染的时候。
+
+````react
+ // 相当于 componentDidMount 和 componentDidUpdate:
+useEffect(() => {
+    // 使用浏览器的 API 更新页面标题
+    document.title = `You clicked ${count} times`;
+});
+````
+
+同时，副作用函数可以通过返回一个函数，指定如何“清除”副作用（它在调用一个新的 effect 之前对前一个 effect 进行清理）。比如：
+
+```react
+useEffect(() => {
+    ChatAPI.subscribeToFriendStatus(props.friend.id, handleStatusChange);
+    return () => {
+      ChatAPI.unsubscribeFromFriendStatus(props.friend.id, handleStatusChange);
+    };
+});
+// 通过副作用函数，可以把组件内相关的副作用组织在一起（例如创建订阅及取消订阅），而不要把它们拆分到不同的生命周期函数里。
+```
+
+
+
+* 为什么每次更新的时候都要运行 Effect：“清除”副作用。
+* 通过跳过 Effect 进行性能优化：指定第二个参数。
+
+
+
+#### HOOK规则
