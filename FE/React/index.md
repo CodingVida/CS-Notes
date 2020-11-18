@@ -737,4 +737,27 @@ useEffect(() => {
 
 
 
-#### HOOK规则
+### HOOK规则
+
+* 只在最顶层使用
+
+    不在条件、循环或嵌套函数中使用
+
+* 只在react函数中使用
+
+`eslint-plugin-react-hooks`
+
+```
+ React 怎么知道哪个 state 对应哪个 useState？答案是 React 靠的是 Hook 调用的顺序。
+```
+
+
+
+### 自定义hook
+
+> 自定义hook是一个以 `use` 开头的函数，其内部可以调用其他的hook。
+
+两个组件之间使用同一个hook只是状态逻辑的重用，不会共享state。
+
+
+
