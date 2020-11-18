@@ -56,3 +56,11 @@ cluster使得nodejs具备使用多核cpu的能力（**多进程**）。
 ### child_process
 
 提供了衍生子**进程**的能力。
+
+
+
+### path
+
+* 文件拓展名：`path.extname(filename)`
+* 文件名（带后缀）：`path.basename(filename)`
+* 纯文件名：`path.basename(filename, ext)`
