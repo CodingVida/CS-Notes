@@ -664,6 +664,44 @@ function WelcomeDialog() {
 
 
 
+### 无障碍
+
+
+
+### 代码分割
+
+#### import()
+
+#### React.lazy
+
+> 配合组件 `Suspense` 做优雅降级。
+
+```jsx
+import React, { Suspense } from 'react';
+
+const OtherComponent = React.lazy(() => import('./OtherCompoent'));
+
+function MyComponent () {
+	return (
+    	<div>
+        	<Suspense fallback={ <div>Loading......</div> }>
+            	<OtherComponent />
+            </Suspense>
+        </div>
+    );
+}
+```
+
+#### 基于路由的代码分割
+
+#### 命名导出
+
+`React.lazy` 目前只支持默认导出（default export）。
+
+可以创建一个中间模块，来重新导出为默认模块。这能保证 tree shaking 不会出错，并且不必引入不需要的组件。
+
+### Context
+
 
 
 ## HOOK
