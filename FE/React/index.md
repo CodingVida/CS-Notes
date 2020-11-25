@@ -700,7 +700,74 @@ function MyComponent () {
 
 可以创建一个中间模块，来重新导出为默认模块。这能保证 tree shaking 不会出错，并且不必引入不需要的组件。
 
+
+
 ### Context
+
+> 组件间数组传递。
+
+* `React.createContext`
+
+    ```jsx
+    const MyContext = React.createContext(defaultValue);
+    ```
+
+    **只有 **当组件所处的树中没有匹配到 Provider 时，其 `defaultValue` 参数才会生效。
+
+* `Context.Provider`
+
+    ```jsx
+    <MyContext.Provider value={  } />
+    ```
+
+    * Provider 接收一个 `value` 属性，传递给消费组件。一个 Provider 可以和多个消费组件有对应关系。多个 Provider 也可以嵌套使用，里层的会覆盖外层的数据。
+    * 当 Provider 的 `value` 值发生变化时，它内部的所有消费组件都会重新渲染。(变化比较是通过 `Object.is` 进行的)。
+
+* `Class.contextType`
+
+    ```jsx
+    class MyClass extends React.Component {
+       componentDidMount() {
+         let value = this.context;
+         /* 在组件挂载完成后，使用 MyContext 组件的值来执行一些有副作用的操作 */
+       }
+    }
+    MyClass.contextType = MyContext;
+    
+    // or:
+    class MyClass extends React.Component {
+      static contextType = MyContext;
+      render() {
+        let value = this.context;
+        /* 基于这个值进行渲染工作 */
+      }
+    }
+    
+    ```
+
+* `Context.Consumer`
+
+    ```jsx
+    <MyContext.Consumer>
+        { value }
+    </MyContext.Consumer>
+    ```
+
+    一个 React 组件可以订阅 context 的变更，这让你在[函数式组件](https://zh-hans.reactjs.org/docs/components-and-props.html#function-and-class-components)中可以订阅 context。
+
+* `Context.displayName`
+
+    for dev tools.
+
+
+
+### Refs转发
+
+#### 转发 refs 到 DOM组件
+
+
+
+####  在高阶组件中转发refs
 
 
 
