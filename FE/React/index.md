@@ -830,6 +830,103 @@ function Glossary(props) {
 
 
 
+### 深入JSX
+
+> JSX 仅仅只是 `React.createElement(component, props, ...children)` 函数的语法糖。
+
+#### 指定React元素类型
+
+* React必须在作用域内，即便没有被直接使用。
+
+  ```jsx
+  import React from 'react';
+  
+  function WarningButton () {
+    return <CustomButton color="red" />;
+  }
+  ```
+
+* jsx类型中使用点语法：比如一个模块导出多个组件；
+
+* 自定义组件大写字母开头
+
+* 运行时选择类型： 需要首先将类型赋值给一个大写字母开头的变量。
+
+#### props
+
+* 表达式作为props
+* 字符串变量
+* 默认值为true：`<MyTextBox autocomplete />``
+* 属性展开：`<Greeting {...props} />;`
+
+#### JSX中的子元素
+
+> 包含在开始标签和结束标签之间的JSX表达式内容将作为特定属性 `props.children`传递给外层组建。
+
+* 字符串字变量
+* jsx子元素
+* js表达式
+* 函数
+* 布尔类型、Null 以及 Undefined 将会忽略
+
+### Portals
+
+> Portal 提供了一种将子节点渲染到存在于父组件以外的 DOM 节点的优秀的方案。
+
+```jsx
+render () {
+  return ReactDOM.createPortal(
+  	this.props.children,
+    domNode
+  );
+}
+```
+
+
+
+### Refs & DOM
+
+> Refs 提供了一种方式，允许我们访问 DOM 节点或在 render 方法中创建的 React 元素。	
+
+#### 何时使用
+
+* 管理焦点，文本选择或媒体播放。
+* 触发强制动画。
+* 继承第三方dom库
+
+#### 创建Refs
+
+`React.createRef()`
+
+```jsx
+class MyComponent extends React.Component {
+  constructor (props) {
+    this.myRef = React.createRef();
+  }
+  render () {
+    return <div ref={ this.myRef } />;
+  }
+}
+```
+
+#### 访问Refs
+
+```jsx
+const node = this.myRef.current;
+```
+
+ref 的值根据节点类型的不同而有所不同：
+
+* html元素，ref接受底层DOM元素作为 `current`属性；
+* 自定义class组件，ref接收挂载实例作为 `current`属性；
+* 默认情况下，函数式组件上不能使用 ref属性（因为它们没有实例）。
+
+#### 将Ref暴露给父组件
+
+#### 回调Refs
+
+
+
 ## HOOK
 
 > 它可以让你在不编写 class 的情况下使用 state 以及其他的 React 特性。
