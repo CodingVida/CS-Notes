@@ -651,7 +651,7 @@ npm install @types/jquery --save-dev
 interface String {
     prependHell(): string;
 }
-// 'foo'.prepednHello();
+// 'foo'.prependHello();
 ````
 
 通过 `declare namespace` 给已有的命名空间添加类型声明：
@@ -750,4 +750,148 @@ npm install @types/node --save-dev
 ## 进阶
 
 
+
+### 类型别名
+
+用来给 **类型** 创建别名，比如：
+
+```ts
+type Name = string;
+```
+
+常用于 联合类型。
+
+
+
+### 字符串字面量类型
+
+约束取值只能是 指定的字符串中的一个：
+
+```ts
+type EventName = 'click' | 'scroll' | 'mousemove';
+function handleEvent (ele, Element, evnet: Eventname) {...}
+```
+
+
+
+### 元组
+
+数组合并了相同类型的对象，元组（Tuple）合并不同的对象：
+
+```ts
+let tom: [string, number] = ['Tom', 25];
+```
+
+支持元素修改，但在整体赋值时需要提供所有指定的项目：
+
+```ts
+let tom: [string, number];
+tom[0] = 'Tom';
+
+tom = ['Tom']; //  Property '1' is missing in type '[string]' but required in type '[string, number]'.
+```
+
+添加越界元素时，会被限制为每个类型的联合类型，上述例子则会被限制为 `string | number`。
+
+
+
+### 枚举
+
+用于限定取值范围。比如一周只有七天：
+
+```ts
+enum Days { Sun, Mon, Tue, Wed, Thu, Fri, Sat };
+```
+
+`Days` 的枚举成员会被赋值为从 `0` 开始的数字，同时会进行反向映射。
+
+```ts
+enum Days {Sun, Mon, Tue, Wed, Thu, Fri, Sat};
+
+console.log(Days["Sun"] === 0); // true
+console.log(Days["Mon"] === 1); // true
+console.log(Days["Tue"] === 2); // true
+console.log(Days["Sat"] === 6); // true
+
+console.log(Days[0] === "Sun"); // true
+console.log(Days[1] === "Mon"); // true
+console.log(Days[2] === "Tue"); // true
+console.log(Days[6] === "Sat"); // true
+```
+
+其编译结果为：
+
+```ts
+var Days;
+(function (Days) {
+    Days[Days["Sun"] = 0] = "Sun";
+    Days[Days["Mon"] = 1] = "Mon";
+    Days[Days["Tue"] = 2] = "Tue";
+    Days[Days["Wed"] = 3] = "Wed";
+    Days[Days["Thu"] = 4] = "Thu";
+    Days[Days["Fri"] = 5] = "Fri";
+    Days[Days["Sat"] = 6] = "Sat";
+})(Days || (Days = {}));
+```
+
+
+
+#### 手动赋值
+
+```ts
+enum Days {Sun = 7, Mon = 1, Tue, Wed, Thu, Fri, Sat};
+
+console.log(Days["Sun"] === 7); // true
+console.log(Days["Mon"] === 1); // true
+console.log(Days["Tue"] === 2); // true
+console.log(Days["Sat"] === 6); // true
+```
+
+手动赋值在 覆盖的情况下，ts 察觉不出。因而需要注意。
+
+
+
+#### 常数项和计算所得项
+
+枚举项有两种类型：常数项（constant member）和计算所得项（computed member）。
+
+```ts
+enum Color {Red, Green, Blue = "blue".length};
+```
+
+上述例子是合法的，但如果blue这个计算所得项之后是未手动赋值的项，那么它们会因为无法获得初始值而报错。
+
+常数项的完整定义：
+
+* 不具有初始化函数，并且之前的成员均是常数；
+* ts表达式的子集，可以在编译阶段求值：
+  * 数字字面量
+  * 引用之前的成员（可以是不同的枚举）
+  * 。。。
+
+#### 常数枚举
+
+常数枚举是使用 `const enum` 定义的枚举类型。
+
+跟普通枚举的区别是，它会在编译阶段删除，并且不能包含计算成员。
+
+```ts
+const enum Directions {
+    Up,
+    Down,
+    Left,
+    Right
+}
+
+let directions = [Directions.Up, Directions.Down, Directions.Left, Directions.Right];
+// var directions = [0 /* Up */, 1 /* Down */, 2 /* Left */, 3 /* Right */];
+```
+
+
+
+#### 外部枚举
+
+外部枚举是使用 `declare enum` 定义的枚举类型。
+
+`declare` 定义的类型只会用于编译时的检查，在编译结果中会被删除。
 
