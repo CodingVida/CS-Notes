@@ -895,3 +895,185 @@ let directions = [Directions.Up, Directions.Down, Directions.Left, Directions.Ri
 
 `declare` 定义的类型只会用于编译时的检查，在编译结果中会被删除。
 
+
+
+### 类
+
+#### ES6中类的用法
+
+#### ES7中类的用法
+
+#### ts中类的用法
+
+* 修饰符
+  * `public`:
+  * `private`: 外部不能访问，包括子类。
+  * `protected`: 
+    * 外部不能访问，子类可以。
+    * 当修饰 `constructor` 时，表明该类只能被继承，不能被实例化。
+* 参数属性：修饰符 和 readonly 可以使用在构造函数参数中，等同于定义属性的同时赋值。
+* `readonly`
+* 抽象类：abstract class`
+  * 不能实例化
+  * 抽象方法必须被字类实现
+
+#### 类的类型
+
+给类加上类型与接口类似：
+
+```ts
+class Animal {
+  name: string;
+  constructor(name: string) {
+    this.name = name;
+  }
+  sayHi (): string {
+    return `My name is ${this.name}`;
+	}
+}
+
+let a: Animal = new Animal('tom');
+console.log(a.sayHi());
+```
+
+
+
+### 类与接口
+
+#### 类实现接口
+
+类可以实现多个接口：
+
+```ts
+interface Alarm {
+  alert(): void;
+}
+interface Light {
+  lightOn(): void;
+  lightOff(): void;
+}
+class Car implements Alarm, Light {
+  ...
+}
+```
+
+
+
+#### 接口继承接口
+
+```ts
+interface LightableAlarm extends Alarm {
+  lightOn(): void;
+  lightOff(): void;
+}
+```
+
+
+
+#### 接口继承类
+
+> 常见的面向对象的语言中，接口不能继承类。
+
+但ts可以：实际上，ts中创建类的同时，也创建了一个**同名的类型**。因此，既可以使用 `new` 实例化，也可以作为一个类型的使用。
+
+
+
+### 泛型
+
+>  泛型（Generics）是指在定义函数、接口或类的时候，不预先指定具体的类型，而在使用的时候再指定类型的一种特性。
+
+```ts
+function createArray<T> (length: number, value: T): Array<T> {
+  const res: T[] = [];
+  for (let i = 0; i < length; i++) {
+    res[i] = value;
+  }
+  return res;
+}
+
+createArray<string>(3, 'x');
+```
+
+在函数名后添加 `<T>` 指代任意类型，在后续的输入value 和 输出中使用。
+
+接着，在调用的时候指定类型。也可以不指定，使用类型推断。
+
+
+
+#### 多个类型参数
+
+```ts
+function swap<T, U>(tuple: [T, U]): [U, T] {
+	return [tuple[1], tuple[0]];
+}
+
+swap([7, 'str']);
+```
+
+
+
+#### 泛型约束
+
+在函数内部使用泛型时，由于不知道它的具体类型，因此不能随便使用它的属性和方法，此时可以对它进行约束。
+
+```ts
+interface Lengthwise {
+  length: number;
+}
+function loggingIdentity<T extends Lengthwise>(args: T): T {
+  console.log(args.length);
+  return arg;
+}
+```
+
+多类型间相互约束：
+
+```ts
+function copyFields<T extends U, U> (target: T, source: U): T {
+  for (let id in source) {
+    target[id] = source[id];
+  }
+  return target;
+}
+
+let target = { a: 1, b: 2, c: 3, d: 4};
+let source = { b: 10, c: 20 };
+copyFields(target, source);
+```
+
+这里要求 T 继承 U，可以保证 U上不会出现 T 不存在的字段。
+
+
+
+#### 泛型接口
+
+
+
+#### 泛型类
+
+```ts
+class GenericNumber<T> {
+  zeroValue: T;
+  add: (x: T, y: T) => T;
+}
+
+const genericNumber = new GenericeNumber<number>();
+```
+
+
+
+#### 泛型参数的默认类型
+
+```ts
+function createArra<T = string> (length: number, value: T): Array<T> {
+  const res: T[] = [];
+  for (let i = 0; i < length; i++) {
+    res[i] = value;
+  }
+  return res;
+}
+```
+
+
+
+### 声明合并
