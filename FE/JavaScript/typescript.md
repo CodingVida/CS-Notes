@@ -136,7 +136,7 @@ anyThing.test('test');
 
 如果没有明确指定一个类型，那么ts会依照 类型推断（Type Inference）的规则推断出一个类型：
 
-* 声明时由赋值，那么推断为值的类型；
+* 声明时有赋值，那么推断为值的类型；
 * 声明时没有赋值，推断为 `any`
 
 
@@ -761,6 +761,12 @@ type Name = string;
 
 常用于 联合类型。
 
+```ts
+type UnionType = number | string;
+
+const x = 'name';
+```
+
 
 
 ### 字符串字面量类型
@@ -1077,3 +1083,48 @@ function createArra<T = string> (length: number, value: T): Array<T> {
 
 
 ### 声明合并
+
+> 定义了相同名字的函数、接口 和 类，会合并成一个类型。
+
+#### 函数的合并
+
+重载。
+
+```ts
+function reverse(x: number): number;
+function reverse(x: number): string;
+function reverse(x: number | string);
+```
+
+
+
+#### 接口的合并
+
+属性合并。
+
+属性的类型需要唯一：类型一致不会报错。
+
+
+
+#### 类的合并
+
+同接口一致。
+
+
+
+## 工程
+
+### 代码检查
+
+* ts - 类型检查
+* eslint - 风格检查
+* prettier - 格式修复
+
+### 编译选项
+
+#### allowJs
+
+允许编译js文件，ts/js混合开发有用。
+
+
+
