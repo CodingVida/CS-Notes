@@ -103,7 +103,7 @@ let u: undefined = undefined;
 let n: null = null;
 ````
 
-与空值类型不同的是，`null` 和 `undefined` 是所有其他类型的子类型，因此可以被赋值给其他类型而不会出错，比如：
+与空值类型不同的是，`null` 和 `undefined` 是所有其他类型的子类型，因此在 **非严格模式下** 可以被赋值给其他类型而不会出错，比如：
 
 ```typescript
 let num: number = null;
