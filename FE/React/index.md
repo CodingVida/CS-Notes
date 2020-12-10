@@ -931,6 +931,12 @@ ref 的值根据节点类型的不同而有所不同：
 >
 > 代码复用。
 
+```tsx
+<DataProvider render={data => (
+	<h1>hello, {data.target}</h1>
+)}/>
+```
+
 
 
 
