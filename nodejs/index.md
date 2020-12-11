@@ -64,3 +64,26 @@ cluster使得nodejs具备使用多核cpu的能力（**多进程**）。
 * 文件拓展名：`path.extname(filename)`
 * 文件名（带后缀）：`path.basename(filename)`
 * 纯文件名：`path.basename(filename, ext)`
+
+
+
+### npx
+
+5.2版本开始支持：
+
+* 调用项目安装的模块：
+
+    ```bash
+    node_modules/.bin/mocha --version
+    npx mocha --version
+    ```
+
+* 避免全局安装模块
+
+    ```bash
+    npx create-react-app my-react-app
+    ```
+
+    上边的代码运行时，npx将 `create-react-app`下载到一个临时目录，使用后再删除。
+
+* ...
