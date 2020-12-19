@@ -54,7 +54,7 @@ Linux的缔造者Linux Torvalds 吸取使用 BitKeeper 的经验教训开发。
 
 #### 4.3 撤销操作
 
-* 将本次提交合并到上一次：`git commit --amend`
+* 将本次提交合并到上一次：`git commit --amend --no-edit`
 * 取消暂存的文件：`git reset filename`
 * 撤销工作区文件修改：`git checkout filename`
 
@@ -152,27 +152,102 @@ git push origin master --force
 
 
 ```bash
-## 强制回退到某次提交
-git reset --hard hash
-git push origin --force
+## 强制回退到某次提交 				=> `a -> b -> c`
+git reset --hard hash		# => `a -> b`
+git push origin --force	// 此时是落后于线上版本的，无法直接推送，需要强制 --force
 
-## 回退到某提提交，保存提交commit记录, 重新commit
-git revert hash
+## 使用一个新的提交来覆盖回退到某提提交：保存提交commit记录, 重新commit
+git revert hash 				# 后边的hash值是需要退回到的版本号，跟reset的选取不同。
 git add .
-git commit -m "."
+git commit -m "."			  # => `a -> b -> c -> b'` 只是引入了更改，使得b‘的内容与b完全一样，
 git push origin
 ```
 
 #### 5.5 Tag
 
+一个锚点（里程碑），永久地指向某次提交。
+
 ```bash
 ## 创建tag
-git tag -a daily/0.0.1 -m "add develop file" // 创建标注标签
-git tag daily/0.0.1 // 简单创建tag
+git tag tagname hash(default: HEAD)
+git tag -a daily/0.0.1 -m "add develop file"
+git tag daily/0.0.1
+
 ## 分享tag到远端
 git push origin [tagname]
 git push origin --tags 
-## 如何已某个tag创建分支
+
+## 从某个tag创建分支
 git checkout -b <newbranch> <tagname>
+```
+
+
+
+### 6.补充
+
+#### 6.1 checkout
+
+`git checkout`的操作意义，是移动 HEAD指针，比如：
+
+* `git checkout bugFix`是将HEAD指针移动到`bugFix`指针（画图理解）
+* `git checkout HEAD^（HEAD～num ｜ hash）`：移动到`HEAD`的前几个提交节点（或某个hash值节点）
+
+
+
+#### 6.2 分支指针移动
+
+```bash
+git branch -f bugFix hash
+git branch -f master HEAD~2
+```
+
+强制将分支指针 `bugFix`的指向 移动到某个节点.
+
+
+
+#### 6.3 cherry-pick
+
+```bash
+git cherry-pick <提交号>...
+
+# git cherry-pick hash1 hash2...
+```
+
+将一些提交复制到当前所在的位置（`HEAD`）下面。
+
+
+
+#### 6.4 交互式rebase
+
+场景：很多时候，我们并不清楚 hash记录。
+
+```bash
+git rebase --interactive(-i) hash
+```
+
+从起点hash节点开始，rebase一个分支出来。
+
+```bash
+git rebase master bugFix 
+# equals 
+git checkout bugFix
+git rebase master
+
+git rebase master (第二个参数默认为HEAD)
+# equals 
+git checkout HEAD
+git rebase master
+```
+
+
+
+#### 6.5 ^num & ~num
+
+* ^后边的数字是指第几个父节点，默认是第一个
+* ～后边的数字是指回退几步
+
+```bash
+git checkout HEAD~^2~2
+# 回退一步，再回退到第二个父节点，再回退两步。
 ```
 
